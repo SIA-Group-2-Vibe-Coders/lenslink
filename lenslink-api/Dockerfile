@@ -41,4 +41,5 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /e
 EXPOSE 80
 
 # Start: cache configs, run migrations, link storage, then start Apache
-CMD bash -c "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan storage:link && apache2-foreground"
+# Note: view:cache is intentionally excluded — this is an API-only project with no Blade views
+CMD bash -c "php artisan config:cache && php artisan route:cache && php artisan migrate --force && php artisan storage:link && apache2-foreground"
