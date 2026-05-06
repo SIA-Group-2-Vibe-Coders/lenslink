@@ -40,5 +40,5 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /e
 # Expose port 80
 EXPOSE 80
 
-# Start Apache and run Laravel setup on start
-CMD bash -c "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && apache2-foreground"
+# Start: cache configs, run migrations, link storage, then start Apache
+CMD bash -c "php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan migrate --force && php artisan storage:link && apache2-foreground"
