@@ -1,6 +1,6 @@
 services:
   - type: web
-      name: lenslink-api
+      name: lenslink
           env: docker
               rootDirectory: lenslink-api
                   dockerContext: .
