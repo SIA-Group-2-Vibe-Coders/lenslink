@@ -38,7 +38,7 @@ async function apiCall(endpoint, method = 'GET', data = null) {
         const response = await fetch(API_BASE_URL + endpoint, config);
         const result = await response.json();
 
-        // Handle unauthorized by redirecting
+        // Handle Unauthorized By Redirecting
         if (response.status === 401 && !endpoint.includes('login') && !endpoint.includes('register')) {
             window.location.href = 'login.html';
         }
