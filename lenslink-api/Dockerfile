@@ -40,6 +40,7 @@ RUN sed -i 's|DocumentRoot /var/www/html|DocumentRoot /var/www/html/public|g' /e
 # Expose port 80
 EXPOSE 80
 
-# Start: cache configs, run migrations, link storage, then start Apache
-# Note: view:cache is intentionally excluded — this is an API-only project with no Blade views
-CMD bash -c "php artisan config:cache && php artisan route:cache && php artisan migrate --force && php artisan storage:link && apache2-foreground"
+# Start: cache configs, run migrations, seed roles & admin, link storage, then start Apache
+# Note: view:cache excluded — API-only project with no Blade views
+# db:seed uses insertOrIgnore so it is safe to run on every restart
+CMD bash -c "php artisan config:cache && php artisan route:cache && php artisan migrate --force && php artisan db:seed --force && php artisan storage:link && apache2-foreground"
