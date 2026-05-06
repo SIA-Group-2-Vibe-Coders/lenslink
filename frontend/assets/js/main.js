@@ -1,8 +1,12 @@
 // frontend/assets/js/main.js
 
-const API_BASE_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' 
-    ? 'http://127.0.0.1:8000/api/' 
-    : '/api/'; // Assumes API is hosted on the same domain in production
+const API_BASE_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000/api/'
+    : 'https://lenslink-api-3w31.onrender.com/api/';
+
+const STORAGE_BASE_URL = window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+    ? 'http://127.0.0.1:8000/storage/'
+    : 'https://lenslink-api-3w31.onrender.com/storage/';
 
 /**
  * Generic API Call Function
@@ -33,12 +37,12 @@ async function apiCall(endpoint, method = 'GET', data = null) {
     try {
         const response = await fetch(API_BASE_URL + endpoint, config);
         const result = await response.json();
-        
+
         // Handle unauthorized by redirecting
         if (response.status === 401 && !endpoint.includes('login') && !endpoint.includes('register')) {
             window.location.href = 'login.html';
         }
-        
+
         return {
             status: response.ok ? 'success' : 'error',
             ...result,
@@ -55,11 +59,9 @@ async function apiCall(endpoint, method = 'GET', data = null) {
  */
 function getStorageUrl(path) {
     if (!path) return 'https://via.placeholder.com/300?text=No+Image';
-    // If it's already a URL, return it
+    // If it's already a full URL, return it
     if (path.startsWith('http')) return path;
-    
-    const base = API_BASE_URL.replace('/api/', '/storage/');
-    return base + path;
+    return STORAGE_BASE_URL + path;
 }
 
 
@@ -87,13 +89,13 @@ async function checkAuth(requiredRole = null) {
             window.location.href = 'login.html';
             return null;
         }
-        
+
         if (requiredRole && res.data.role_id != requiredRole) {
             alert('Unauthorized access');
             window.location.href = 'login.html';
             return null;
         }
-        
+
         return res.data;
     } catch (e) {
         window.location.href = 'login.html';
