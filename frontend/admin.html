@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LensLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col">
+    
+    <nav class="border-b border-zinc-800/50 glass-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center text-white font-bold text-xl">L</div>
+                <span class="text-xl font-semibold tracking-tight text-white">System Admin</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <span class="text-sm font-medium text-red-400">Administrator Mode</span>
+                <button onclick="logout()" class="text-sm font-medium text-zinc-400 hover:text-white transition">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-7xl mx-auto w-full px-6 py-8">
+        <h1 class="text-3xl font-bold text-white mb-8">System Overview</h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8" id="statsGrid">
+            <!-- Stats populated by JS -->
+            <div class="glass-panel p-6 rounded-xl border border-zinc-800/50">
+                <h3 class="text-sm font-medium text-zinc-400 mb-1">Total Users</h3>
+                <p class="text-3xl font-bold text-white" id="statUsers">--</p>
+            </div>
+            <div class="glass-panel p-6 rounded-xl border border-zinc-800/50">
+                <h3 class="text-sm font-medium text-zinc-400 mb-1">Total Uploads</h3>
+                <p class="text-3xl font-bold text-white" id="statUploads">--</p>
+            </div>
+            <div class="glass-panel p-6 rounded-xl border border-zinc-800/50">
+                <h3 class="text-sm font-medium text-zinc-400 mb-1">Storage Used</h3>
+                <p class="text-3xl font-bold text-amber-500" id="statStorage">--</p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="glass-panel rounded-xl border border-zinc-800/50 overflow-hidden">
+                <div class="px-6 py-4 border-b border-zinc-800/50 bg-zinc-900/50">
+                    <h3 class="font-semibold text-white">Recent Uploads</h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4 text-sm" id="recentUploadsList">
+                        <li class="text-zinc-500">Loading...</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="glass-panel rounded-xl border border-zinc-800/50 overflow-hidden">
+                <div class="px-6 py-4 border-b border-zinc-800/50 bg-zinc-900/50">
+                    <h3 class="font-semibold text-white">Failed Login Attempts</h3>
+                </div>
+                <div class="p-6">
+                    <ul class="space-y-4 text-sm" id="failedLoginsList">
+                        <li class="text-zinc-500">Loading...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await checkAuth(1); // 1 = Admin
+            if (user) {
+                loadAdminStats();
+            }
+        });
+
+        async function loadAdminStats() {
+            try {
+                const res = await apiCall('admin-stats', 'GET');
+                if (res.status === 'success') {
+                    const data = res.data;
+                    document.getElementById('statUsers').textContent = data.total_users;
+                    document.getElementById('statUploads').textContent = data.total_uploads;
+                    document.getElementById('statStorage').textContent = formatBytes(data.storage_usage_bytes);
+                    
+                    const uploadsList = document.getElementById('recentUploadsList');
+                    if (data.recent_uploads.length > 0) {
+                        uploadsList.innerHTML = data.recent_uploads.map(u => 
+                            `<li class="flex justify-between text-zinc-300"><span>${u.original_filename}</span> <span class="text-zinc-500">${new Date(u.created_at).toLocaleString()}</span></li>`
+                        ).join('');
+                    } else {
+                        uploadsList.innerHTML = '<li class="text-zinc-500">No recent uploads</li>';
+                    }
+
+                    const loginsList = document.getElementById('failedLoginsList');
+                    if (data.failed_logins.length > 0) {
+                        loginsList.innerHTML = data.failed_logins.map(l => 
+                            `<li class="flex justify-between text-red-400"><span>IP: ${l.ip_address}</span> <span class="text-zinc-500">${new Date(l.login_time).toLocaleString()}</span></li>`
+                        ).join('');
+                    } else {
+                        loginsList.innerHTML = '<li class="text-zinc-500">No failed logins recently</li>';
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load admin stats");
+            }
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (!+bytes) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+        }
+    </script>
+</body>
+</html>
