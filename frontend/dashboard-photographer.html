@@ -66,13 +66,18 @@
         </div>
     </main>
 
+    <script src="https://js.pusher.com/8.4/pusher.min.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/chat.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const user = await checkAuth(2); // 2 = Photographer
             if (user) {
                 document.getElementById('userNameDisplay').textContent = user.name;
                 loadGalleries();
+
+                // Init chat — use gallery ID 1 as default; extend once gallery selection is implemented
+                initChat(user, 1);
             }
         });
 

@@ -47,13 +47,18 @@
         </div>
     </main>
 
+    <script src="https://js.pusher.com/8.4/pusher.min.js"></script>
     <script src="assets/js/main.js"></script>
+    <script src="assets/js/chat.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const user = await checkAuth(3); // 3 = Client
             if (user) {
                 document.getElementById('userNameDisplay').textContent = 'Welcome, ' + user.name;
                 loadGalleries();
+
+                // Init chat for gallery ID 1 by default
+                initChat(user, 1);
             }
         });
 
