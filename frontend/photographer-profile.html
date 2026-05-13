@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photographer Profile - LensLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://js.pusher.com/8.0/pusher.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        zinc: { 850: '#202022', 900: '#18181b', 950: '#0f0f11' },
+                        amber: { 400: '#fbbf24', 500: '#f59e0b' }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col">
+    
+    <nav class="border-b border-zinc-800/50 bg-zinc-950/80 backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-bold text-xl">L</div>
+                <span class="text-xl font-semibold tracking-tight text-white">LensLink</span>
+            </a>
+            <div id="nav-links" class="flex items-center space-x-6">
+                <a href="photographers.html" class="text-sm font-medium text-zinc-400 hover:text-white transition">Discover</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow">
+        <!-- Hero Section -->
+        <section id="profile-hero" class="relative pt-40 pb-24 px-6 border-b border-white/5 overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-tr from-amber-500/10 via-zinc-950 to-transparent"></div>
+            <div class="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 pointer-events-none"></div>
+            
+            <div class="max-w-5xl mx-auto flex flex-col md:flex-row items-center md:items-end gap-12 relative z-10">
+                <div class="w-48 h-48 md:w-56 md:h-56 rounded-[2.5rem] overflow-hidden border-[6px] border-zinc-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] flex-shrink-0 -rotate-2 group hover:rotate-0 transition-transform duration-700">
+                    <img id="p-avatar" src="" alt="" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-700">
+                </div>
+                <div class="flex-grow text-center md:text-left mb-4">
+                    <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                        <h1 id="p-name" class="text-5xl md:text-6xl font-extrabold text-white tracking-tighter">...</h1>
+                        <span id="p-specialty" class="inline-block px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 font-bold uppercase tracking-widest text-[10px]">...</span>
+                    </div>
+                    <p id="p-bio" class="text-zinc-400 text-xl leading-relaxed mb-10 max-w-2xl font-light italic">...</p>
+                    <div class="flex flex-wrap justify-center md:justify-start gap-8 mb-10 text-sm">
+                        <div class="flex flex-col">
+                            <span class="text-zinc-500 text-[10px] uppercase tracking-widest mb-1">Base Location</span>
+                            <span id="p-location" class="text-zinc-200 font-semibold text-base">...</span>
+                        </div>
+                        <div class="flex flex-col border-l border-zinc-800 pl-8">
+                            <span class="text-zinc-500 text-[10px] uppercase tracking-widest mb-1">Price Guide</span>
+                            <span id="p-price" class="text-zinc-200 font-semibold text-base">...</span>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="message-btn" class="px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-sm uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] hover:-translate-y-1 active:translate-y-0 transition-all duration-300">
+                            Send Message
+                        </button>
+                        <button class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white hover:bg-zinc-800 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Portfolio/Galleries Section -->
+        <section class="max-w-7xl mx-auto px-6 py-20">
+            <div class="flex items-center justify-between mb-12">
+                <h2 class="text-2xl font-bold text-white tracking-tight">Public Portfolio</h2>
+                <div class="h-px bg-zinc-800 flex-grow mx-8 hidden sm:block"></div>
+            </div>
+            
+            <div id="gallery-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                <!-- Dynamic galleries -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-8 border-t border-zinc-800 text-center text-sm text-zinc-500">
+        &copy; 2026 LensLink Photography Platform.
+    </footer>
+
+    <script src="assets/js/main.js"></script>
+    <script src="assets/js/chat.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const photographerId = urlParams.get('id');
+            
+            if (!photographerId) {
+                window.location.href = 'photographers.html';
+                return;
+            }
+
+            // Init Chat if user logged in
+            const user = JSON.parse(localStorage.getItem('user'));
+            if (user && window.initChat) {
+                window.initChat(user);
+            }
+
+            try {
+                const result = await apiCall(`photographers/${photographerId}`);
+                
+                if (result.status === 'success') {
+                    const p = result.data;
+                    document.title = `${p.name} - LensLink Profile`;
+                    
+                    document.getElementById('p-name').textContent = p.name;
+                    document.getElementById('p-avatar').src = p.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=f59e0b&color=18181b&size=200`;
+                    document.getElementById('p-specialty').textContent = p.specialty || 'Professional Photographer';
+                    document.getElementById('p-bio').textContent = p.bio || 'This photographer hasn\'t added a bio yet.';
+                    document.getElementById('p-location').textContent = p.location || 'Not Specified';
+                    document.getElementById('p-price').textContent = p.price_range || 'Contact for pricing';
+
+                    renderGalleries(p.galleries);
+
+                    document.getElementById('message-btn').onclick = () => {
+                        if (!localStorage.getItem('auth_token')) {
+                            window.location.href = 'login.html';
+                            return;
+                        }
+                        if (window.openDirectChat) {
+                            window.openDirectChat(p.id, p.name);
+                        }
+                    };
+                }
+            } catch (error) {
+                console.error('Error fetching profile:', error);
+            }
+
+            function renderGalleries(galleries) {
+                const grid = document.getElementById('gallery-grid');
+                grid.innerHTML = '';
+                
+                if (!galleries || galleries.length === 0) {
+                    grid.innerHTML = '<p class="col-span-full text-center text-zinc-500 py-10">No public galleries published yet.</p>';
+                    return;
+                }
+
+                galleries.forEach(g => {
+                    const card = `
+                        <div class="group bg-zinc-900/20 border border-zinc-900 rounded-2xl overflow-hidden hover:border-amber-500/20 transition-all duration-500">
+                            <div class="aspect-[4/5] relative overflow-hidden">
+                                <img src="${g.cover_image_url || 'https://images.unsplash.com/photo-1493723843671-1d655e7d987a?q=80&w=1000&auto=format&fit=crop'}" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+                                <div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-60"></div>
+                                <div class="absolute bottom-6 left-6 right-6">
+                                    <h3 class="text-xl font-bold text-white mb-1">${g.title}</h3>
+                                    <p class="text-sm text-zinc-300 line-clamp-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">${g.description || ''}</p>
+                                </div>
+                            </div>
+                            <div class="p-4 flex justify-between items-center bg-zinc-900/40">
+                                <span class="text-[10px] text-zinc-500 uppercase tracking-widest">${new Date(g.created_at).toLocaleDateString()}</span>
+                                <a href="gallery-view.html?id=${g.id}" class="text-xs font-bold text-amber-500 hover:text-white transition">View Gallery</a>
+                            </div>
+                        </div>
+                    `;
+                    grid.innerHTML += card;
+                });
+            }
+        });
+    </script>
+</body>
+</html>

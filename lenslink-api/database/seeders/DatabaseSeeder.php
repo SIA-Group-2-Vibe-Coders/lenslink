@@ -31,5 +31,8 @@ class DatabaseSeeder extends Seeder
                 'role_id' => 1
             ]
         );
+
+        // Seed sample photographers
+        $this->call(PhotographerSeeder::class);
     }
 }

@@ -36,3 +36,8 @@ Broadcast::channel('chat.{galleryId}', function ($user, $galleryId) {
 
     return false;
 });
+
+Broadcast::channel('chat.direct.{ids}', function ($user, $ids) {
+    $allowedIds = explode('-', $ids);
+    return in_array($user->id, $allowedIds);
+});

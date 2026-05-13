@@ -2,37 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\MessageSent;
-use App\Models\Gallery;
-use App\Models\Message;
+use App\Services\MessageService;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
 {
+    protected $messageService;
+
+    public function __construct(MessageService $messageService)
+    {
+        $this->messageService = $messageService;
+    }
+
     /**
-     * GET /messages?gallery_id=X
-     * Fetch paginated message history for a gallery.
-     * Accessible by the gallery's photographer or assigned client.
+     * GET /messages?gallery_id=X OR /messages?receiver_id=Y
+     * Fetch message history.
      */
     public function index(Request $request)
     {
         $request->validate([
-            'gallery_id' => 'required|exists:galleries,id',
+            'gallery_id'  => 'nullable|exists:galleries,id',
+            'receiver_id' => 'nullable|exists:users,id',
         ]);
 
-        // Verify the authenticated user belongs to this gallery conversation
-        $this->authorizeGalleryAccess($request->user(), $request->gallery_id);
+        if (!$request->gallery_id && !$request->receiver_id) {
+            return response()->json(['error' => 'Either gallery_id or receiver_id is required.'], 422);
+        }
 
-        $messages = Message::where('gallery_id', $request->gallery_id)
-            ->with('sender:id,name,role_id')
-            ->orderBy('created_at', 'asc')
-            ->get();
-
-        // Mark all unread messages as read for the current user
-        Message::where('gallery_id', $request->gallery_id)
-            ->where('sender_id', '!=', $request->user()->id)
-            ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+        $messages = $this->messageService->getHistory(
+            $request->user(),
+            $request->gallery_id,
+            $request->receiver_id
+        );
 
         return response()->json([
             'status' => 'success',
@@ -42,28 +43,21 @@ class MessageController extends Controller
 
     /**
      * POST /messages
-     * Send a new message and broadcast it via Pusher.
+     * Send a new message.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'gallery_id' => 'required|exists:galleries,id',
-            'body'       => 'required|string|max:2000',
+            'gallery_id'  => 'nullable|exists:galleries,id',
+            'receiver_id' => 'nullable|exists:users,id',
+            'body'        => 'required|string|max:2000',
         ]);
 
-        // Verify the authenticated user belongs to this gallery conversation
-        $this->authorizeGalleryAccess($request->user(), $request->gallery_id);
+        if (!$request->gallery_id && !$request->receiver_id) {
+            return response()->json(['error' => 'Either gallery_id or receiver_id is required.'], 422);
+        }
 
-        $message = Message::create([
-            'gallery_id' => $request->gallery_id,
-            'sender_id'  => $request->user()->id,
-            'body'       => $request->body,
-        ]);
-
-        // Broadcast to private Pusher channel: chat.{gallery_id}
-        broadcast(new MessageSent($message))->toOthers();
-
-        $message->load('sender:id,name,role_id');
+        $message = $this->messageService->sendMessage($request->user(), $request->all());
 
         return response()->json([
             'status'  => 'success',
@@ -73,21 +67,17 @@ class MessageController extends Controller
     }
 
     /**
-     * Ensure the requesting user is the photographer who owns the gallery
-     * or a client with access to it.
-     * For now: photographer (role 2) can access any gallery; client (role 3) can access all.
-     * Extend this once gallery ↔ client assignments are implemented.
+     * GET /conversations
+     * Fetch list of users the current user has chatted with.
      */
-    private function authorizeGalleryAccess($user, $galleryId): void
+    public function conversations(Request $request)
     {
-        $gallery = Gallery::findOrFail($galleryId);
+        $contacts = $this->messageService->getConversations($request->user());
 
-        // Photographer can only chat in their own galleries
-        if ($user->role_id == 2 && $gallery->photographer_id !== $user->id) {
-            abort(403, 'You do not own this gallery.');
-        }
-
-        // Clients can access any public gallery chat for now
-        // (Restrict further when client-gallery assignments are added)
+        return response()->json([
+            'status' => 'success',
+            'data'   => $contacts,
+        ]);
     }
 }
+

@@ -16,33 +16,33 @@ class MessageSent implements ShouldBroadcast
 
     public function __construct(public Message $message)
     {
-        // Load sender so it's included in the broadcast payload
         $this->message->load('sender:id,name,role_id');
     }
 
     /**
-     * The private channel name is gallery-specific.
-     * Both the photographer and client subscribe to the same channel
-     * for the gallery they share.
+     * Determine the channel based on whether it's a gallery chat or direct chat.
      */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel('chat.' . $this->message->gallery_id),
-        ];
+        if ($this->message->gallery_id) {
+            return [new PrivateChannel('chat.' . $this->message->gallery_id)];
+        }
+
+        // For direct chat, use a deterministic channel name: direct.{minId}-{maxId}
+        $ids = [$this->message->sender_id, $this->message->receiver_id];
+        sort($ids);
+        return [new PrivateChannel('chat.direct.' . $ids[0] . '-' . $ids[1])];
     }
 
-    /**
-     * Shape of the data sent to the frontend.
-     */
     public function broadcastWith(): array
     {
         return [
-            'id'         => $this->message->id,
-            'gallery_id' => $this->message->gallery_id,
-            'body'       => $this->message->body,
-            'sender'     => $this->message->sender,
-            'created_at' => $this->message->created_at->toISOString(),
+            'id'          => $this->message->id,
+            'gallery_id'  => $this->message->gallery_id,
+            'receiver_id' => $this->message->receiver_id,
+            'body'        => $this->message->body,
+            'sender'      => $this->message->sender,
+            'created_at'  => $this->message->created_at->toISOString(),
         ];
     }
 

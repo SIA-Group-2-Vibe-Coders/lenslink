@@ -76,8 +76,8 @@
                 document.getElementById('userNameDisplay').textContent = user.name;
                 loadGalleries();
 
-                // Init chat — use gallery ID 1 as default; extend once gallery selection is implemented
-                initChat(user, 1);
+                // Initialize chat system
+                initChat(user);
             }
         });
 
@@ -91,7 +91,7 @@
                     grid.innerHTML = '';
                     res.data.forEach(gallery => {
                         const card = document.createElement('div');
-                        card.className = 'glass-panel rounded-xl overflow-hidden border border-zinc-800/50 hover:border-amber-500/50 transition cursor-pointer group';
+                        card.className = 'glass-panel rounded-xl overflow-hidden border border-zinc-800/50 hover:border-amber-500/50 transition group';
                         card.innerHTML = `
                             <div class="h-48 bg-zinc-900 relative overflow-hidden">
                                 <img src="${getStorageUrl(gallery.cover_image)}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" alt="${gallery.title}">
@@ -100,9 +100,14 @@
                             <div class="p-4">
                                 <h3 class="text-lg font-bold text-white mb-1">${gallery.title}</h3>
                                 <p class="text-xs text-zinc-500 mb-3">${gallery.description || 'No description'}</p>
-                                <div class="flex justify-between items-center">
-                                    <span class="text-xs bg-zinc-800 px-2 py-1 rounded text-zinc-300">${gallery.is_public ? 'Public' : 'Private'}</span>
-                                    <button onclick="manageGallery(${gallery.id})" class="text-amber-500 text-sm hover:text-amber-400 font-medium">Manage &rarr;</button>
+                                <div class="flex justify-between items-center pt-3 border-t border-zinc-800/50">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-[10px] bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-400 font-medium uppercase">${gallery.is_public ? 'Public' : 'Private'}</span>
+                                        <button onclick="openChat(${gallery.id})" class="text-amber-500 hover:text-amber-400 transition" title="Message Client">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.77 9.77 0 01-4-.847L3 20l1.075-3.224A7.963 7.963 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                                        </button>
+                                    </div>
+                                    <button onclick="manageGallery(${gallery.id})" class="text-white text-sm hover:text-amber-500 font-bold transition">Manage &rarr;</button>
                                 </div>
                             </div>
                         `;

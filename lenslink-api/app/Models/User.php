@@ -24,6 +24,11 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'avatar',
+        'bio',
+        'specialty',
+        'location',
+        'price_range',
     ];
 
     /**
@@ -47,5 +52,10 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function galleries()
+    {
+        return $this->hasMany(Gallery::class, 'photographer_id');
     }
 }

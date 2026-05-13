@@ -61,15 +61,20 @@
                 const res = await apiCall('login', 'POST', { email, password });
                 
                 if (res.status === 'success') {
-                    // Save Sanctum token
+                    // Save Sanctum token and user data
                     localStorage.setItem('auth_token', res.token);
+                    localStorage.setItem('user', JSON.stringify(res.data));
                     
                     // Redirect based on role
                     if (res.data.role_id == 1) window.location.href = 'admin.html';
                     else if (res.data.role_id == 2) window.location.href = 'dashboard-photographer.html';
                     else window.location.href = 'dashboard-client.html';
                 } else {
-                    alertBox.textContent = res.message || 'Login failed.';
+                    let errMsg = res.message || 'Login failed.';
+                    if (res.errors) {
+                        errMsg = Object.values(res.errors).flat().join('<br>');
+                    }
+                    alertBox.innerHTML = errMsg;
                     alertBox.classList.remove('hidden');
                 }
             } catch (err) {

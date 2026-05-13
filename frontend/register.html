@@ -82,7 +82,11 @@
                     successBox.classList.remove('hidden');
                     setTimeout(() => window.location.href = 'login.html', 2000);
                 } else {
-                    alertBox.textContent = res.message || 'Registration failed.';
+                    let errMsg = res.message || 'Registration failed.';
+                    if (res.errors) {
+                        errMsg = Object.values(res.errors).flat().join('<br>');
+                    }
+                    alertBox.innerHTML = errMsg;
                     alertBox.classList.remove('hidden');
                     btn.innerHTML = 'Create Account';
                     btn.disabled = false;
