@@ -37,4 +37,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/messages', [MessageController::class, 'index']);
     Route::post('/messages', [MessageController::class, 'store']);
     Route::get('/conversations', [MessageController::class, 'conversations']);
+
+    // Stripe Payments
+    Route::post('/bookings/intent', [\App\Http\Controllers\BookingController::class, 'createIntent']);
+
+    // Google Maps Location Search
+    Route::get('/search/location', [\App\Http\Controllers\PhotographerController::class, 'searchByLocation']);
+
+    // Firebase External Auth Sync
+    Route::post('/auth/firebase', [\App\Http\Controllers\AuthController::class, 'firebaseSync']);
 });

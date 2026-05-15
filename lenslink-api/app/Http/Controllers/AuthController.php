@@ -8,10 +8,12 @@ use Illuminate\Http\Request;
 class AuthController extends Controller
 {
     protected $authService;
+    protected $externalAuthService;
 
-    public function __construct(AuthService $authService)
+    public function __construct(AuthService $authService, \App\Services\ExternalAuthService $externalAuthService)
     {
         $this->authService = $authService;
+        $this->externalAuthService = $externalAuthService;
     }
 
     /**
@@ -78,6 +80,24 @@ class AuthController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+    /**
+     * POST /api/auth/firebase
+     * Sync and login with a Firebase token.
+     */
+    public function firebaseSync(Request $request)
+    {
+        $request->validate(['id_token' => 'required']);
+
+        $user = $this->externalAuthService->authenticateWithFirebase($request->id_token);
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'status' => 'success',
+            'access_token' => $token,
+            'user' => $user,
         ]);
     }
 }
