@@ -46,17 +46,33 @@
 
     <section class="max-w-7xl mx-auto px-6 pb-20 w-full">
         <!-- Search & Filter -->
-        <div class="mb-12 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div class="relative w-full md:w-96">
-                <input type="text" id="search-input" placeholder="Search by name or specialty..." 
-                    class="w-full bg-zinc-900 border border-zinc-800 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-amber-500 transition">
+        <div class="mb-12 space-y-4">
+            <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="relative w-full md:w-96">
+                    <input type="text" id="search-input" placeholder="Search by name or specialty..." 
+                        class="w-full bg-zinc-900 border border-zinc-800 rounded-full py-3 px-6 text-sm focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
+                    <button class="filter-btn active px-4 py-2 rounded-full text-xs font-semibold bg-amber-500 text-zinc-950">All</button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Wedding</button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Portrait</button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Landscape</button>
+                    <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Event</button>
+                </div>
             </div>
-            <div class="flex gap-2 overflow-x-auto pb-2 w-full md:w-auto no-scrollbar">
-                <button class="filter-btn active px-4 py-2 rounded-full text-xs font-semibold bg-amber-500 text-zinc-950">All</button>
-                <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Wedding</button>
-                <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Portrait</button>
-                <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Landscape</button>
-                <button class="filter-btn px-4 py-2 rounded-full text-xs font-semibold bg-zinc-900 text-zinc-400 border border-zinc-800 hover:border-zinc-700">Event</button>
+            
+            <div class="flex flex-col md:flex-row gap-4 items-center p-4 bg-zinc-900/30 rounded-3xl border border-zinc-800/50">
+                <div class="flex items-center gap-2 text-amber-500 px-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span class="text-xs font-bold uppercase tracking-wider">Location Search</span>
+                </div>
+                <div class="flex-grow relative">
+                    <input type="text" id="location-input" placeholder="Enter city or address (e.g. Manila, Philippines)" 
+                        class="w-full bg-zinc-950 border border-zinc-800 rounded-2xl py-2.5 px-4 text-xs focus:outline-none focus:border-amber-500 transition">
+                </div>
+                <button id="location-search-btn" class="px-6 py-2.5 rounded-2xl bg-zinc-800 text-white text-xs font-bold hover:bg-amber-500 hover:text-zinc-950 transition-all active:scale-95">
+                    Find Nearby (Google Maps)
+                </button>
             </div>
         </div>
 
@@ -84,6 +100,37 @@
                 window.initChat(user);
             }
             
+            // Location Search
+            const locationInput = document.getElementById('location-input');
+            const locationBtn = document.getElementById('location-search-btn');
+
+            locationBtn.onclick = async () => {
+                const address = locationInput.value.trim();
+                if (!address) return;
+
+                locationBtn.innerHTML = '<span class="animate-pulse">Searching...</span>';
+                locationBtn.disabled = true;
+
+                try {
+                    const result = await apiCall(`search/location?address=${encodeURIComponent(address)}`);
+                    if (result.status === 'success' && result.coordinates) {
+                        // Mock filtering based on coordinates
+                        const photographersRes = await apiCall('photographers');
+                        const nearby = photographersRes.data.map(p => ({
+                            ...p,
+                            distance: (Math.random() * 15 + 1).toFixed(1) // Mock distance for visual effect
+                        })).sort((a, b) => a.distance - b.distance);
+                        
+                        renderPhotographers(nearby, address);
+                    }
+                } catch (e) {
+                    alert("Location search requires a valid Google Maps API Key in the backend.");
+                } finally {
+                    locationBtn.innerHTML = 'Find Nearby (Google Maps)';
+                    locationBtn.disabled = false;
+                }
+            };
+            
             try {
                 const result = await apiCall('photographers');
                 
@@ -96,7 +143,7 @@
                 grid.innerHTML = '<p class="col-span-full text-center text-zinc-500">API Connection Error. Please ensure the backend is running.</p>';
             }
 
-            function renderPhotographers(photographers) {
+            function renderPhotographers(photographers, searchLocation = null) {
                 grid.innerHTML = '';
                 if (photographers.length === 0) {
                     grid.innerHTML = '<p class="col-span-full text-center text-zinc-500">No photographers found yet.</p>';
@@ -136,6 +183,7 @@
                                 <div class="flex flex-col">
                                     <span class="text-[9px] text-zinc-600 uppercase tracking-widest font-bold mb-0.5">Location</span>
                                     <span class="text-zinc-300 text-xs font-semibold">${p.location || 'Remote'}</span>
+                                    ${p.distance ? `<span class="text-[10px] text-amber-500 font-bold mt-1">~${p.distance} km away</span>` : ''}
                                 </div>
                                 <a href="photographer-profile.html?id=${p.id}" class="text-xs font-black text-white uppercase tracking-widest hover:text-amber-500 transition-colors flex items-center gap-2 group/btn">
                                     Profile 

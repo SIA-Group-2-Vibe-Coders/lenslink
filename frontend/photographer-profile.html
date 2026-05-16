@@ -63,9 +63,12 @@
                             <span id="p-price" class="text-zinc-200 font-semibold text-base">...</span>
                         </div>
                     </div>
-                    <div class="flex gap-4">
-                        <button id="message-btn" class="px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-sm uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] hover:-translate-y-1 active:translate-y-0 transition-all duration-300">
+                    <div class="flex flex-wrap gap-4">
+                        <button id="message-btn" class="px-8 py-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white font-bold text-sm uppercase tracking-widest hover:bg-zinc-800 transition-all duration-300">
                             Send Message
+                        </button>
+                        <button id="book-btn" class="px-10 py-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-sm uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] hover:-translate-y-1 active:translate-y-0 transition-all duration-300">
+                            Book & Pay (Stripe)
                         </button>
                         <button class="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 text-white hover:bg-zinc-800 transition">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
@@ -94,6 +97,7 @@
 
     <script src="assets/js/main.js"></script>
     <script src="assets/js/chat.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -109,6 +113,9 @@
             if (user && window.initChat) {
                 window.initChat(user);
             }
+
+            const stripePublicKey = 'pk_test_placeholder'; // Should be in env or fetched
+            const stripe = Stripe(stripePublicKey);
 
             try {
                 const result = await apiCall(`photographers/${photographerId}`);
@@ -133,6 +140,37 @@
                         }
                         if (window.openDirectChat) {
                             window.openDirectChat(p.id, p.name);
+                        }
+                    };
+
+                    document.getElementById('book-btn').onclick = async () => {
+                        if (!localStorage.getItem('auth_token')) {
+                            window.location.href = 'login.html';
+                            return;
+                        }
+
+                        const amount = prompt("Enter booking deposit amount ($):", "50");
+                        if (!amount) return;
+
+                        const btn = document.getElementById('book-btn');
+                        const originalText = btn.innerText;
+                        btn.innerText = "Initializing Stripe...";
+                        btn.disabled = true;
+
+                        try {
+                            const stripeRes = await apiCall('bookings/intent', 'POST', {
+                                amount: parseInt(amount),
+                                photographer_id: photographerId
+                            });
+                            
+                            if (stripeRes.client_secret) {
+                                alert(`Stripe Payment Intent Created Successfully!\n\nClient Secret: ${stripeRes.client_secret}\n\nIn production, this would now open the Stripe Payment Sheet or Elements UI.`);
+                            }
+                        } catch (e) {
+                            alert("Stripe Integration Error: Ensure STRIPE_SECRET is set in the backend .env");
+                        } finally {
+                            btn.innerText = originalText;
+                            btn.disabled = false;
                         }
                     };
                 }

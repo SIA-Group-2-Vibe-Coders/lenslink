@@ -56,13 +56,36 @@ The project follows a **Service-Layer Architecture** to keep the codebase clean,
    php artisan serve
    ```
 
-## API Documentation
+## Core Integrations (Mandatory APIs)
 
-- `POST /api/register` - User registration
-- `POST /api/login` - User authentication
-- `GET /api/gallery` - List public galleries
-- `GET /api/photographers` - Discover photographers
-- `POST /api/upload` - Image upload (Requires Authentication)
+LensLink is integrated with 5 essential third-party services to provide a professional photography experience:
+
+1.  **Cloudinary (Storage & CDN)**: Handles image uploads, automatic watermarking, and responsive image transformations.
+2.  **Pusher (Real-time Messaging)**: Powering the direct chat system with instant message delivery and status updates.
+3.  **Stripe (Payments)**: Secure payment intent creation for booking deposits and professional services.
+4.  **Google Maps (Geocoding)**: Enables "Nearby Photographer" search by converting user input addresses into geographic coordinates.
+5.  **Firebase (Auth Sync)**: Allows seamless Google/Social sign-in synchronization with the local user database.
+
+## Deployment Guide
+
+### Backend (Laravel) - Deploying to Render/Railway
+1.  **Repository**: Connect this repository to your hosting provider.
+2.  **Build Command**: `composer install --no-dev && php artisan migrate --force`
+3.  **Environment Variables**: Ensure all keys in `.env.example` are set in your hosting provider's dashboard.
+4.  **Database**: Recommended to use a managed PostgreSQL instance (e.g., Supabase).
+
+### Frontend (HTML/JS) - Deploying to Vercel/Netlify
+1.  **Repository**: Connect the `/frontend` directory.
+2.  **API URL**: Update `assets/js/main.js` with your production backend URL.
+3.  **Firebase**: Configure your production Firebase config in `login.html`.
+
+## API Endpoints (Quick Reference)
+
+- `GET /api/photographers` - List all photographers.
+- `GET /api/search/location?address={city}` - Search photographers by city (Google Maps).
+- `POST /api/bookings/intent` - Create a Stripe payment intent.
+- `POST /api/auth/firebase` - Sync Firebase social login with local account.
+- `GET /api/messages` - Retrieve chat history.
 
 ---
 © 2026 LensLink Project

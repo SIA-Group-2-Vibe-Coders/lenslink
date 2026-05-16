@@ -38,6 +38,16 @@
                     Sign In
                 </button>
             </form>
+
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-zinc-800"></div></div>
+                <div class="relative flex justify-center text-xs uppercase"><span class="bg-zinc-950 px-2 text-zinc-500">Or continue with</span></div>
+            </div>
+
+            <button id="firebaseLogin" class="w-full bg-white text-zinc-950 font-semibold rounded-lg px-4 py-3 hover:bg-zinc-200 transition flex items-center justify-center space-x-2">
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-5 h-5">
+                <span>Sign in with Google</span>
+            </button>
             
             <div class="mt-6 text-center text-sm text-zinc-500">
                 Don't have an account? <a href="register.html" class="text-amber-500 hover:text-amber-400 font-medium">Create one</a>
@@ -46,7 +56,55 @@
     </div>
 
     <script src="assets/js/main.js"></script>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+
     <script>
+        // Firebase Configuration (Placeholders - to be filled by user in production)
+        const firebaseConfig = {
+            apiKey: "FIREBASE_API_KEY",
+            authDomain: "lenslink-auth.firebaseapp.com",
+            projectId: "lenslink-auth",
+            storageBucket: "lenslink-auth.appspot.com",
+            messagingSenderId: "SENDER_ID",
+            appId: "APP_ID"
+        };
+        
+        // Initialize Firebase
+        if (firebaseConfig.apiKey !== "FIREBASE_API_KEY") {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        async function handleFirebaseLogin() {
+            if (firebaseConfig.apiKey === "FIREBASE_API_KEY") {
+                alert("Please configure your Firebase credentials in login.html");
+                return;
+            }
+
+            try {
+                const result = await firebase.auth().signInWithPopup(googleProvider);
+                const idToken = await result.user.getIdToken();
+                
+                // Sync with backend
+                const syncRes = await apiCall('auth/firebase', 'POST', { id_token: idToken });
+                
+                if (syncRes.status === 'success' || syncRes.user) {
+                    localStorage.setItem('auth_token', syncRes.token || 'firebase_session');
+                    localStorage.setItem('user', JSON.stringify(syncRes.user));
+                    window.location.href = syncRes.user.role_id == 2 ? 'dashboard-photographer.html' : 'dashboard-client.html';
+                }
+            } catch (error) {
+                console.error("Firebase Login Error:", error);
+                alert("Firebase Login Failed: " + error.message);
+            }
+        }
+
+        document.getElementById('google-login-btn').onclick = handleFirebaseLogin;
+
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
