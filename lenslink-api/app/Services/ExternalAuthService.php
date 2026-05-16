@@ -15,9 +15,16 @@ class ExternalAuthService
     public function authenticateWithFirebase(string $idToken)
     {
         $auth = Firebase::auth();
-        $verifiedIdToken = $auth->verifyIdToken($idToken);
-        $firebaseUid = $verifiedIdToken->claims()->get('sub');
-        $firebaseUser = $auth->getUser($firebaseUid);
+        
+        try {
+            $verifiedIdToken = $auth->verifyIdToken($idToken);
+            $firebaseUid = $verifiedIdToken->claims()->get('sub');
+            $firebaseUser = $auth->getUser($firebaseUid);
+        } catch (\Throwable $e) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'id_token' => ['The provided Firebase token is invalid or expired.']
+            ]);
+        }
 
         $user = User::updateOrCreate(
             ['email' => $firebaseUser->email],

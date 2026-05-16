@@ -18,13 +18,13 @@ class ImageService
     public function uploadImage(User $photographer, UploadedFile $file, int $albumId): array
     {
         // Upload original image to Cloudinary under lenslink/active folder
-        $uploadResult = Cloudinary::upload($file->getRealPath(), [
+        $uploadResult = Cloudinary::uploadApi()->upload($file->getRealPath(), [
             'folder'        => 'lenslink/active',
             'resource_type' => 'image',
         ]);
 
-        $publicId   = $uploadResult->getPublicId();
-        $originalUrl = $uploadResult->getSecurePath();
+        $publicId   = $uploadResult['public_id'];
+        $originalUrl = $uploadResult['secure_url'];
 
         // Generate thumbnail URL (300px wide) using Cloudinary transformation
         $thumbnailUrl = "{$this->cloudBase}/w_300,c_scale/{$publicId}";
@@ -72,7 +72,7 @@ class ImageService
         // Move the image from active → archive folder in Cloudinary
         $newPublicId = str_replace('lenslink/active/', 'lenslink/archive/', $oldPublicId);
 
-        Cloudinary::rename($oldPublicId, $newPublicId);
+        Cloudinary::uploadApi()->rename($oldPublicId, $newPublicId);
 
         $image->update([
             'status'    => 'archived',
