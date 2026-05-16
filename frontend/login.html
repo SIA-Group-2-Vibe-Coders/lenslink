@@ -64,12 +64,13 @@
     <script>
         // Firebase Configuration (Placeholders - to be filled by user in production)
         const firebaseConfig = {
-            apiKey: "FIREBASE_API_KEY",
-            authDomain: "lenslink-auth.firebaseapp.com",
-            projectId: "lenslink-auth",
-            storageBucket: "lenslink-auth.appspot.com",
-            messagingSenderId: "SENDER_ID",
-            appId: "APP_ID"
+            apiKey: "AIzaSyAZcQZK_9sWrz8L7XVU-qra_bNfY86dKXc",
+            authDomain: "lenslink-43561.firebaseapp.com",
+            projectId: "lenslink-43561",
+            storageBucket: "lenslink-43561.firebasestorage.app",
+            messagingSenderId: "859298338221",
+            appId: "1:859298338221:web:8f6dcc69e7270bf4997d24",
+            measurementId: "G-R4VZBVRQYT"
         };
         
         // Initialize Firebase
@@ -103,7 +104,7 @@
             }
         }
 
-        document.getElementById('google-login-btn').onclick = handleFirebaseLogin;
+        document.getElementById('firebaseLogin').onclick = handleFirebaseLogin;
 
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
