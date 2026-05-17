@@ -25,6 +25,7 @@ class User extends Authenticatable
         'password',
         'role_id',
         'avatar',
+        'cover_photo',
         'bio',
         'specialty',
         'location',
@@ -57,5 +58,20 @@ class User extends Authenticatable
     public function galleries()
     {
         return $this->hasMany(Gallery::class, 'photographer_id');
+    }
+
+    public function posts()
+    {
+        return $this->hasMany(Post::class);
+    }
+
+    public function bookingsAsClient()
+    {
+        return $this->hasMany(Booking::class, 'client_id');
+    }
+
+    public function bookingsAsPhotographer()
+    {
+        return $this->hasMany(Booking::class, 'photographer_id');
     }
 }

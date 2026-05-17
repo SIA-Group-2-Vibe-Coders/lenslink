@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting - LensLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        zinc: { 850: '#202022', 900: '#18181b', 950: '#0f0f11' },
+                        amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+                    }
+                }
+            }
+        }
+    </script>
+    <script>
+        // Synchronous Zero-Flash Fast Redirect
+        try {
+            const token = localStorage.getItem('auth_token');
+            const userStr = localStorage.getItem('user');
+            if (!token) {
+                window.location.replace('login.html');
+            } else if (userStr) {
+                const user = JSON.parse(userStr);
+                if (user && user.role_id) {
+                    if (user.role_id == 1) {
+                        window.location.replace('admin.html');
+                    } else if (user.role_id == 2) {
+                        window.location.replace('dashboard-photographer.html');
+                    } else if (user.role_id == 3) {
+                        window.location.replace('dashboard-client.html');
+                    }
+                }
+            }
+        } catch (e) {
+            console.error("Fast redirect error:", e);
+        }
+    </script>
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden">
+    
+    <!-- Premium Ambient Background Blur Nodes -->
+    <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-zinc-800/20 rounded-full blur-[120px] pointer-events-none"></div>
+
+    <div class="glass-panel border border-zinc-800/50 rounded-2xl p-8 max-w-sm w-full text-center relative overflow-hidden animate-fade-in z-10 shadow-2xl">
+        <!-- Pulse Glow Amber Ring around the logo placeholder -->
+        <div class="relative w-20 h-20 mx-auto mb-6 flex items-center justify-center">
+            <div class="absolute inset-0 rounded-full border border-amber-500/30 animate-ping opacity-75"></div>
+            <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500/10 to-amber-600/10 blur-sm"></div>
+            <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-bold text-3xl shadow-xl shadow-amber-500/25 relative z-10 select-none">
+                L
+            </div>
+        </div>
+
+        <!-- Sleek Pulse Loader -->
+        <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Routing Portal</h2>
+        <p class="text-zinc-400 text-sm mb-6 font-light">Verifying your active secure session...</p>
+        
+        <div class="flex justify-center items-center gap-1.5">
+            <span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></span>
+            <span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></span>
+            <span class="w-2.5 h-2.5 bg-amber-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></span>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="assets/js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('auth_token');
+            if (!token) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            try {
+                // Fetch fresh profile from API
+                const res = await apiCall('profile', 'GET');
+                if (res.status === 'success' && res.data) {
+                    localStorage.setItem('user', JSON.stringify(res.data));
+                    
+                    const role = res.data.role_id;
+                    if (role == 1) {
+                        window.location.replace('admin.html');
+                    } else if (role == 2) {
+                        window.location.replace('dashboard-photographer.html');
+                    } else if (role == 3) {
+                        window.location.replace('dashboard-client.html');
+                    } else {
+                        // Fallback for unexpected roles
+                        console.error('Unknown role:', role);
+                        window.location.replace('login.html');
+                    }
+                } else {
+                    // Invalid token or session error
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('user');
+                    window.location.replace('login.html');
+                }
+            } catch (err) {
+                console.error("Session verification failed:", err);
+                window.location.replace('login.html');
+            }
+        });
+    </script>
+</body>
+</html>

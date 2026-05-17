@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AuthService;
 use Illuminate\Http\Request;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class AuthController extends Controller
 {
@@ -80,6 +81,54 @@ class AuthController extends Controller
         return response()->json([
             'status'  => 'success',
             'message' => 'Logged out successfully'
+        ]);
+    }
+
+    /**
+     * POST /profile/update
+     */
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $request->validate([
+            'name' => 'nullable|string|max:255',
+            'bio' => 'nullable|string|max:1000',
+            'specialty' => 'nullable|string|max:255',
+            'location' => 'nullable|string|max:255',
+            'price_range' => 'nullable|string|max:255',
+            'avatar' => 'nullable|image|max:5120',
+            'cover_photo' => 'nullable|image|max:10240',
+        ]);
+
+        $data = $request->only('name', 'bio', 'specialty', 'location', 'price_range');
+
+        // Handle Avatar Upload
+        if ($request->hasFile('avatar')) {
+            $avatarFile = $request->file('avatar');
+            $uploadResult = Cloudinary::uploadApi()->upload($avatarFile->getRealPath(), [
+                'folder' => 'lenslink/avatars',
+                'resource_type' => 'image',
+            ]);
+            $data['avatar'] = $uploadResult['secure_url'];
+        }
+
+        // Handle Cover Photo Upload
+        if ($request->hasFile('cover_photo')) {
+            $coverFile = $request->file('cover_photo');
+            $uploadResult = Cloudinary::uploadApi()->upload($coverFile->getRealPath(), [
+                'folder' => 'lenslink/covers',
+                'resource_type' => 'image',
+            ]);
+            $data['cover_photo'] = $uploadResult['secure_url'];
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Profile updated successfully',
+            'data' => $user
         ]);
     }
 

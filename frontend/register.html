@@ -5,54 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Account - LensLink</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        zinc: { 850: '#202022', 900: '#18181b', 950: '#0f0f11' },
+                        amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 <body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col justify-center items-center px-4 relative overflow-hidden">
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-amber-900/20 via-zinc-950 to-zinc-950 -z-10"></div>
+    <!-- Premium Ambient Lighting -->
+    <div class="absolute top-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-amber-500/10 blur-[120px] -z-10"></div>
+    <div class="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-amber-600/5 blur-[120px] -z-10"></div>
     
-    <div class="w-full max-w-md">
+    <!-- Decorative Grid Overlay -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:32px_32px] -z-10"></div>
+
+    <div class="w-full max-w-md animate-fade-in">
         <div class="text-center mb-8">
-            <a href="index.html" class="inline-flex items-center space-x-2 mb-6">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-bold text-xl">L</div>
-                <span class="text-2xl font-semibold tracking-tight text-white">LensLink</span>
+            <a href="index.html" class="inline-flex items-center space-x-3 mb-6 group">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-bold text-xl shadow-[0_0_20px_rgba(245,158,11,0.4)] group-hover:scale-105 transition-transform duration-300">L</div>
+                <span class="text-2xl font-bold tracking-tight text-white group-hover:text-amber-400 transition-colors">LensLink</span>
             </a>
-            <h2 class="text-3xl font-bold text-white mb-2">Create an account</h2>
-            <p class="text-zinc-400 text-sm">Join the premium photography platform.</p>
+            <h2 class="text-3xl font-extrabold text-white mb-2 tracking-tight">Create Account</h2>
+            <p class="text-zinc-400 text-sm">Join the premium photography & social platform.</p>
         </div>
 
-        <div class="glass-panel p-8 rounded-2xl border border-zinc-800/50 shadow-2xl relative">
-            <div id="alertBox" class="hidden mb-4 p-3 rounded bg-red-500/10 border border-red-500/50 text-red-400 text-sm text-center"></div>
-            <div id="successBox" class="hidden mb-4 p-3 rounded bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 text-sm text-center"></div>
+        <div class="glass-panel p-8 rounded-2xl border border-zinc-800/40 shadow-2xl relative">
+            <div id="alertBox" class="hidden mb-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center"></div>
+            <div id="successBox" class="hidden mb-4 p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm text-center"></div>
             
-            <form id="registerForm" class="space-y-4">
+            <form id="registerForm" class="space-y-4.5">
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">Full Name</label>
-                    <input type="text" id="full_name" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition">
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Full Name</label>
+                    <input type="text" id="full_name" required class="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition duration-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">Email Address</label>
-                    <input type="email" id="email" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition">
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Email Address</label>
+                    <input type="email" id="email" required class="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition duration-300">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">Password</label>
-                    <input type="password" id="password" required class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-zinc-400 mb-1">Account Type</label>
-                    <select id="role_id" class="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition appearance-none">
-                        <option value="3">Client</option>
-                        <option value="2">Photographer</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">Password</label>
+                    <input type="password" id="password" required class="w-full bg-zinc-900/60 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/50 transition duration-300">
                 </div>
                 
-                <button type="submit" id="submitBtn" class="w-full bg-amber-500 text-zinc-950 font-semibold rounded-lg px-4 py-3 hover:bg-amber-400 transition mt-4">
+                <button type="submit" id="submitBtn" class="w-full bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold rounded-xl px-4 py-3.5 transition duration-300 mt-5 shadow-[0_0_20px_rgba(245,158,11,0.35)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transform hover:-translate-y-0.5">
                     Create Account
                 </button>
             </form>
             
             <div class="mt-6 text-center text-sm text-zinc-500">
-                Already have an account? <a href="login.html" class="text-amber-500 hover:text-amber-400 font-medium">Sign in</a>
+                Already have an account? <a href="login.html" class="text-amber-400 hover:text-amber-300 font-semibold transition-colors">Sign in</a>
             </div>
         </div>
     </div>
@@ -64,12 +76,12 @@
             const full_name = document.getElementById('full_name').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const role_id = document.getElementById('role_id').value;
+            const role_id = 2; // Hardcode to standard unified user profile
             const btn = document.getElementById('submitBtn');
             const alertBox = document.getElementById('alertBox');
             const successBox = document.getElementById('successBox');
             
-            btn.innerHTML = 'Creating...';
+            btn.innerHTML = 'Creating account...';
             btn.disabled = true;
             alertBox.classList.add('hidden');
             successBox.classList.add('hidden');
@@ -80,7 +92,7 @@
                 if (res.status === 'success') {
                     successBox.textContent = 'Account created successfully! Redirecting to login...';
                     successBox.classList.remove('hidden');
-                    setTimeout(() => window.location.href = 'login.html', 2000);
+                    setTimeout(() => window.location.href = 'login.html', 1500);
                 } else {
                     let errMsg = res.message || 'Registration failed.';
                     if (res.errors) {
