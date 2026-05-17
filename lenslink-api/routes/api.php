@@ -57,6 +57,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Payments/Bookings
     Route::post('/bookings/intent', [\App\Http\Controllers\BookingController::class, 'createIntent']);
     Route::get('/bookings', [\App\Http\Controllers\BookingController::class, 'index']);
+    Route::get('/bookings/{id}', [\App\Http\Controllers\BookingController::class, 'show']);
     Route::post('/bookings', [\App\Http\Controllers\BookingController::class, 'store']);
     Route::patch('/bookings/{id}/status', [\App\Http\Controllers\BookingController::class, 'updateStatus']);
     Route::post('/bookings/{id}/pay', [\App\Http\Controllers\BookingController::class, 'pay']);

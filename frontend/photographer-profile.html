@@ -32,6 +32,7 @@
                 <span class="text-xl font-semibold tracking-tight text-white">LensLink</span>
             </a>
             <div id="nav-links" class="flex items-center space-x-6">
+                <a href="feed.html" class="text-sm font-medium text-zinc-400 hover:text-white transition">Social Feed</a>
                 <a href="photographers.html" class="text-sm font-medium text-zinc-400 hover:text-white transition">Discover</a>
             </div>
         </div>
@@ -98,6 +99,72 @@
     <script src="assets/js/main.js"></script>
     <script src="assets/js/chat.js"></script>
     <script src="https://js.stripe.com/v3/"></script>
+    
+    <!-- Booking Modal -->
+    <div id="booking-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4">
+        <!-- Backdrop -->
+        <div id="booking-modal-backdrop" class="absolute inset-0 bg-zinc-950/80 backdrop-blur-sm transition-opacity duration-300 opacity-0"></div>
+        
+        <!-- Modal Content Container -->
+        <div id="booking-modal-container" class="bg-zinc-900/95 border border-zinc-800 rounded-3xl w-full max-w-lg relative z-10 overflow-hidden shadow-[0_32px_64px_-12px_rgba(0,0,0,0.8)] transition-all duration-300 transform scale-95 opacity-0 flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="p-6 border-b border-zinc-800/50 flex justify-between items-center bg-zinc-900/50">
+                <div>
+                    <h3 class="text-xl font-bold text-white tracking-tight">Book Photography Session</h3>
+                    <p class="text-xs text-zinc-400 mt-1">Select date, amount & specify details</p>
+                </div>
+                <button id="close-booking-modal" class="p-2 rounded-xl bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-white transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Body / Form -->
+            <form id="booking-form" class="p-6 overflow-y-auto space-y-6 flex-grow">
+                <!-- Date Picker -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Session Date & Time</label>
+                    <input type="datetime-local" id="booking-date" required
+                           class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition">
+                </div>
+                
+                <!-- Deposit Amount Preset Selector -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Deposit Amount ($)</label>
+                    <div class="grid grid-cols-4 gap-2 mb-3">
+                        <button type="button" class="preset-btn px-4 py-2.5 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-amber-500/5 text-zinc-300 hover:text-white font-semibold text-xs transition" data-amount="50">$50</button>
+                        <button type="button" class="preset-btn px-4 py-2.5 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-amber-500/5 text-zinc-300 hover:text-white font-semibold text-xs transition" data-amount="100">$100</button>
+                        <button type="button" class="preset-btn px-4 py-2.5 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-amber-500/5 text-zinc-300 hover:text-white font-semibold text-xs transition" data-amount="250">$250</button>
+                        <button type="button" class="preset-btn px-4 py-2.5 rounded-xl border border-zinc-800 hover:border-amber-500/50 hover:bg-amber-500/5 text-zinc-300 hover:text-white font-semibold text-xs transition" data-amount="500">$500</button>
+                    </div>
+                    
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-500 font-semibold">$</span>
+                        <input type="number" id="booking-amount" min="1" required placeholder="Custom Deposit Amount"
+                               class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl pl-8 pr-4 py-3 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition">
+                    </div>
+                </div>
+                
+                <!-- Notes Textarea -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Session Notes & Requirements</label>
+                    <textarea id="booking-notes" rows="3" placeholder="Briefly describe what kind of photoshoot you need, themes, specific locations, etc."
+                              class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl p-4 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition resize-none"></textarea>
+                </div>
+                
+                <!-- Feedback error messaging container -->
+                <div id="booking-error" class="hidden text-red-500 text-xs font-medium p-3 bg-red-500/10 border border-red-500/20 rounded-xl"></div>
+                
+                <!-- Submit Button -->
+                <button type="submit" id="submit-booking-btn"
+                        class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] active:translate-y-0.5 transition-all duration-300">
+                    Confirm & Proceed to Checkout
+                </button>
+            </form>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -143,34 +210,97 @@
                         }
                     };
 
-                    document.getElementById('book-btn').onclick = async () => {
+                    // Setup Modal Elements
+                    const modal = document.getElementById('booking-modal');
+                    const backdrop = document.getElementById('booking-modal-backdrop');
+                    const container = document.getElementById('booking-modal-container');
+                    const closeBtn = document.getElementById('close-booking-modal');
+                    const form = document.getElementById('booking-form');
+                    const errorContainer = document.getElementById('booking-error');
+                    
+                    function openModal() {
+                        modal.classList.remove('hidden');
+                        setTimeout(() => {
+                            backdrop.classList.remove('opacity-0');
+                            backdrop.classList.add('opacity-100');
+                            container.classList.remove('scale-95', 'opacity-0');
+                            container.classList.add('scale-100', 'opacity-100');
+                        }, 50);
+                    }
+                    
+                    function closeModal() {
+                        backdrop.classList.remove('opacity-100');
+                        backdrop.classList.add('opacity-0');
+                        container.classList.remove('scale-100', 'opacity-100');
+                        container.classList.add('scale-95', 'opacity-0');
+                        setTimeout(() => {
+                            modal.classList.add('hidden');
+                        }, 300);
+                    }
+                    
+                    document.getElementById('book-btn').onclick = () => {
                         if (!localStorage.getItem('auth_token')) {
                             window.location.href = 'login.html';
                             return;
                         }
-
-                        const amount = prompt("Enter booking deposit amount ($):", "50");
-                        if (!amount) return;
-
-                        const btn = document.getElementById('book-btn');
-                        const originalText = btn.innerText;
-                        btn.innerText = "Initializing Stripe...";
-                        btn.disabled = true;
-
+                        openModal();
+                    };
+                    
+                    closeBtn.onclick = closeModal;
+                    backdrop.onclick = closeModal;
+                    
+                    // Preset buttons
+                    const presetBtns = document.querySelectorAll('.preset-btn');
+                    const amountInput = document.getElementById('booking-amount');
+                    presetBtns.forEach(btn => {
+                        btn.onclick = () => {
+                            presetBtns.forEach(b => b.classList.remove('border-amber-500', 'bg-amber-500/10', 'text-amber-500'));
+                            btn.classList.add('border-amber-500', 'bg-amber-500/10', 'text-amber-500');
+                            amountInput.value = btn.getAttribute('data-amount');
+                        };
+                    });
+                    
+                    // Reset preset styling if user types custom amount
+                    amountInput.oninput = () => {
+                        presetBtns.forEach(b => b.classList.remove('border-amber-500', 'bg-amber-500/10', 'text-amber-500'));
+                    };
+                    
+                    // Submit Form
+                    form.onsubmit = async (e) => {
+                        e.preventDefault();
+                        errorContainer.classList.add('hidden');
+                        
+                        const date = document.getElementById('booking-date').value;
+                        const amount = amountInput.value;
+                        const notes = document.getElementById('booking-notes').value;
+                        
+                        const submitBtn = document.getElementById('submit-booking-btn');
+                        const originalText = submitBtn.innerText;
+                        submitBtn.innerText = "Creating Booking...";
+                        submitBtn.disabled = true;
+                        
                         try {
-                            const stripeRes = await apiCall('bookings/intent', 'POST', {
-                                amount: parseInt(amount),
-                                photographer_id: photographerId
+                            const res = await apiCall('bookings', 'POST', {
+                                photographer_id: parseInt(photographerId),
+                                session_date: date,
+                                amount: parseFloat(amount),
+                                notes: notes
                             });
                             
-                            if (stripeRes.client_secret) {
-                                alert(`Stripe Payment Intent Created Successfully!\n\nClient Secret: ${stripeRes.client_secret}\n\nIn production, this would now open the Stripe Payment Sheet or Elements UI.`);
+                            if (res.status === 'success') {
+                                closeModal();
+                                window.location.href = `booking-checkout.html?id=${res.data.id}`;
+                            } else {
+                                errorContainer.textContent = res.message || 'Failed to create booking';
+                                errorContainer.classList.remove('hidden');
                             }
-                        } catch (e) {
-                            alert("Stripe Integration Error: Ensure STRIPE_SECRET is set in the backend .env");
+                        } catch (err) {
+                            errorContainer.textContent = 'Network or connection error. Please try again.';
+                            errorContainer.classList.remove('hidden');
+                            console.error(err);
                         } finally {
-                            btn.innerText = originalText;
-                            btn.disabled = false;
+                            submitBtn.innerText = originalText;
+                            submitBtn.disabled = false;
                         }
                     };
                 }

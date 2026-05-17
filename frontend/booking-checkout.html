@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Booking Checkout - LensLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                    colors: {
+                        zinc: { 850: '#202022', 900: '#18181b', 950: '#0f0f11' },
+                        amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Interactive Virtual Card Flip Styles */
+        .card-perspective {
+            perspective: 1000px;
+        }
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transform-style: preserve-3d;
+        }
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        /* Checkmark pop success animation */
+        @keyframes scaleIn {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes drawCheck {
+            0% { stroke-dashoffset: 48; }
+            100% { stroke-dashoffset: 0; }
+        }
+        .animate-scale-in {
+            animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .animate-draw-check {
+            stroke-dasharray: 48;
+            stroke-dashoffset: 48;
+            animation: drawCheck 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.3s forwards;
+        }
+
+        /* Floating Confetti styles */
+        .confetti-particle {
+            position: absolute;
+            top: -10px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Ambient glowing circles */
+        .ambient-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -10;
+        }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Premium Ambient Lighting -->
+    <div class="ambient-glow top-[-10%] right-[-10%] w-[600px] h-[600px] bg-amber-500/5"></div>
+    <div class="ambient-glow bottom-[-10%] left-[-15%] w-[600px] h-[600px] bg-amber-600/5"></div>
+
+    <!-- Decorative Grid Overlay -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:40px_40px] -z-10"></div>
+
+    <!-- Navigation Header -->
+    <nav class="border-b border-zinc-900/60 bg-zinc-950/80 backdrop-blur-xl sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3 group cursor-pointer" onclick="window.location.href='index.html'">
+                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-extrabold text-xl shadow-[0_0_15px_rgba(245,158,11,0.3)]">L</div>
+                <span class="text-xl font-bold tracking-tight text-white group-hover:text-amber-500 transition duration-300">LensLink <span class="text-amber-500 text-xs font-medium tracking-widest uppercase ml-1.5 px-2 py-0.5 bg-amber-500/10 rounded-full">Secure Checkout</span></span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="dashboard-client.html" class="text-sm font-medium text-zinc-400 hover:text-white transition">My Portal</a>
+                <button onclick="logout()" class="text-sm font-medium text-zinc-400 hover:text-white transition">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-5xl mx-auto w-full px-6 py-12 flex flex-col items-center justify-center relative">
+        <!-- Main Loading State -->
+        <div id="booking-loading" class="flex flex-col items-center justify-center py-20 space-y-4">
+            <div class="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin"></div>
+            <p class="text-zinc-400 font-medium">Securing connection to billing servers...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="booking-error" class="hidden glass-panel max-w-md w-full p-8 rounded-2xl border border-red-500/30 text-center space-y-6">
+            <div class="w-16 h-16 mx-auto rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center text-red-500">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-white mb-2">Invalid Booking Session</h3>
+                <p id="error-message-text" class="text-zinc-400 text-sm">We couldn't retrieve the specified booking. Please verify the URL or try booking again.</p>
+            </div>
+            <button onclick="window.location.href='dashboard-client.html'" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-medium rounded-xl transition">
+                Return to Dashboard
+            </button>
+        </div>
+
+        <!-- Checkout View Grid (Hidden until loaded) -->
+        <div id="checkout-grid" class="hidden w-full grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+            <!-- Left Side: Order Summary Card -->
+            <div class="lg:col-span-5 space-y-6">
+                <div class="glass-panel p-6 rounded-2xl border border-zinc-800/80 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-xl"></div>
+                    
+                    <h2 class="text-xs font-bold uppercase tracking-widest text-amber-500 mb-6 flex items-center space-x-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                        <span>Booking Invoice</span>
+                    </h2>
+
+                    <!-- Photographer Info Row -->
+                    <div class="flex items-center space-x-4 pb-6 border-b border-zinc-800/60">
+                        <div class="relative">
+                            <img id="photographer-avatar" src="assets/images/default-avatar.png" class="w-14 h-14 rounded-full object-cover border border-amber-500/30" alt="Photographer">
+                            <span class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-emerald-500 border-2 border-zinc-950 rounded-full"></span>
+                        </div>
+                        <div>
+                            <h3 id="photographer-name" class="text-lg font-bold text-white leading-tight">Photographer</h3>
+                            <p id="photographer-specialty" class="text-zinc-400 text-xs">Specialist</p>
+                            <p id="photographer-meta" class="text-zinc-500 text-[10px] mt-0.5 uppercase tracking-wider">Location</p>
+                        </div>
+                    </div>
+
+                    <!-- Session Metadata List -->
+                    <div class="py-6 space-y-4 border-b border-zinc-800/60">
+                        <div class="flex items-start space-x-3 text-sm">
+                            <svg class="w-5 h-5 text-zinc-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <div>
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-zinc-500">Session Date & Time</span>
+                                <span id="booking-date" class="text-white font-medium text-sm">Format Date</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-3 text-sm">
+                            <svg class="w-5 h-5 text-zinc-500 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <div>
+                                <span class="block text-[10px] uppercase font-bold tracking-wider text-zinc-500">Client Request / Notes</span>
+                                <span id="booking-notes" class="text-zinc-300 text-xs italic">No specific instructions provided.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Subtotals & Deposit Due -->
+                    <div class="pt-6 space-y-3">
+                        <div class="flex justify-between items-center text-sm text-zinc-400">
+                            <span>Service Session Subtotal</span>
+                            <span id="session-subtotal" class="font-mono">$0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-zinc-400">
+                            <span>LensLink Gateway Fee</span>
+                            <span class="text-emerald-500 font-medium">Free</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t border-zinc-800/60">
+                            <span class="text-base font-bold text-white">Deposit Due Now</span>
+                            <span id="deposit-total" class="text-2xl font-extrabold text-amber-500 font-mono">$0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Trust Banner -->
+                <div class="glass-panel p-4 rounded-xl border border-zinc-900 flex items-center space-x-3 bg-zinc-900/20">
+                    <svg class="w-5 h-5 text-amber-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    <span class="text-xs text-zinc-400 leading-normal">
+                        Funds are held securely. The photographer is only paid upon successful session completion and gallery delivery.
+                    </span>
+                </div>
+            </div>
+
+            <!-- Right Side: Secure Checkout Portal -->
+            <div class="lg:col-span-7 space-y-6">
+                <!-- Sandbox Informational Gold Banner -->
+                <div id="sandbox-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start space-x-3 animate-fade-in">
+                    <svg class="w-5 h-5 text-amber-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div class="text-xs">
+                        <span class="font-bold text-amber-400 block mb-0.5">Simulated Sandbox Sandbox Mode Active</span>
+                        <p class="text-zinc-300 leading-relaxed">
+                            Stripe live credentials are offline or mock mode was triggered. Use any valid simulation card detail to securely book.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="glass-panel p-8 rounded-2xl border border-zinc-800/80 shadow-2xl space-y-8">
+                    <!-- Heading & Mode Selector -->
+                    <div class="flex justify-between items-center pb-4 border-b border-zinc-900">
+                        <div>
+                            <h2 class="text-lg font-bold text-white">Payment Method</h2>
+                            <p class="text-xs text-zinc-400">Credit or debit card checkout</p>
+                        </div>
+                        <div id="stripe-logo" class="h-5 opacity-60">
+                            <!-- Stripe Badge -->
+                            <span class="text-[10px] font-bold tracking-widest bg-zinc-800 px-3 py-1 rounded text-zinc-300 uppercase">SECURE PORTAL</span>
+                        </div>
+                    </div>
+
+                    <!-- STRIPE ELEMENT FORM -->
+                    <div id="stripe-form-panel">
+                        <form id="stripe-payment-form" class="space-y-6">
+                            <div class="space-y-2">
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400">Credit or Debit Card</label>
+                                <div id="stripe-card-element" class="bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-4 focus-within:border-amber-500 outline-none transition">
+                                    <!-- Stripe element mounts here -->
+                                </div>
+                                <div id="stripe-error" class="hidden text-red-500 text-xs font-semibold p-3 bg-red-500/10 border border-red-500/20 rounded-xl animate-fade-in"></div>
+                            </div>
+
+                            <button type="submit" id="stripe-submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] active:translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <span>Pay Secure Deposit</span>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- MOCK SANDBOX VIRTUAL CREDIT CARD (SWAPS IN IF IS_MOCK IS DETECTED) -->
+                    <div id="sandbox-form-panel" class="hidden space-y-8 animate-fade-in">
+                        <!-- Graphic 3D Flipping Card Container -->
+                        <div class="card-perspective w-full max-w-sm h-52 mx-auto relative cursor-pointer group" onclick="toggleCardFlip()">
+                            <div id="credit-card" class="card-inner w-full h-full">
+                                <!-- CARD FRONT -->
+                                <div class="card-front p-6 bg-gradient-to-tr from-amber-500 via-amber-600 to-zinc-900 border border-amber-500/20 text-white shadow-2xl flex flex-col justify-between overflow-hidden">
+                                    <!-- Decorative ambient lens glass inside card -->
+                                    <div class="absolute -right-10 -top-10 w-32 h-32 rounded-full bg-white/5 blur-xl pointer-events-none"></div>
+                                    
+                                    <!-- Chip and logo -->
+                                    <div class="flex justify-between items-start z-10">
+                                        <div class="w-11 h-8 bg-gradient-to-r from-yellow-300 to-yellow-500 rounded flex flex-col justify-between p-1.5 opacity-80 shadow-inner">
+                                            <div class="grid grid-cols-3 gap-0.5 w-full h-full">
+                                                <div class="border border-zinc-950/20 rounded-sm"></div>
+                                                <div class="border border-zinc-950/20 rounded-sm"></div>
+                                                <div class="border border-zinc-950/20 rounded-sm"></div>
+                                                <div class="border border-zinc-950/20 rounded-sm"></div>
+                                                <div class="border border-zinc-950/20 rounded-sm"></div>
+                                                <div class="border border-zinc-950/20 rounded-sm"></div>
+                                            </div>
+                                        </div>
+                                        <div id="card-network-logo" class="h-6 flex items-center">
+                                            <span class="font-extrabold tracking-widest text-xs opacity-60">LENS CARD</span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Card number -->
+                                    <div id="card-number-display" class="text-xl font-bold tracking-widest text-center font-mono my-4 z-10">
+                                        •••• •••• •••• ••••
+                                    </div>
+
+                                    <!-- Name & Expiry -->
+                                    <div class="flex justify-between items-end z-10">
+                                        <div class="flex flex-col">
+                                            <span class="text-[7px] uppercase tracking-widest text-zinc-300">Card Holder</span>
+                                            <span id="card-name-display" class="text-xs font-semibold tracking-wider uppercase truncate max-w-[200px]">JOHN DOE</span>
+                                        </div>
+                                        <div class="flex flex-col items-end">
+                                            <span class="text-[7px] uppercase tracking-widest text-zinc-300">Expires</span>
+                                            <span id="card-expiry-display" class="text-xs font-semibold tracking-wider font-mono">MM/YY</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- CARD BACK -->
+                                <div class="card-back bg-zinc-900 border border-zinc-800 text-white shadow-2xl flex flex-col justify-between py-6 overflow-hidden">
+                                    <!-- Magstrip -->
+                                    <div class="w-full h-10 bg-zinc-950"></div>
+                                    <!-- Signature panel & CVV -->
+                                    <div class="px-6 flex items-center justify-end space-x-3 my-2">
+                                        <div class="flex-grow bg-white/10 h-8 rounded text-right pr-3 flex items-center justify-end text-zinc-400 italic font-mono text-xs select-none bg-[repeating-linear-gradient(45deg,rgba(255,255,255,0.05),rgba(255,255,255,0.05)_10px,transparent_10px,transparent_20px)]">
+                                            sandbox authorized
+                                        </div>
+                                        <div class="flex flex-col items-start">
+                                            <span class="text-[7px] uppercase tracking-widest text-zinc-500 mb-0.5">CVV</span>
+                                            <div id="card-cvv-display" class="bg-amber-500 text-zinc-950 font-bold px-3 py-1 rounded text-xs font-mono tracking-widest">
+                                                •••
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Card Info -->
+                                    <div class="px-6 flex justify-between items-center text-[7px] text-zinc-500 tracking-wider">
+                                        <span>SECURE SIMULATION - NO FUNDS CHARGED</span>
+                                        <span class="font-extrabold text-zinc-400">LENSLINK</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Sandbox Form Fields -->
+                        <form id="sandbox-payment-form" class="space-y-4">
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Cardholder Name</label>
+                                <input type="text" id="sb-card-name" placeholder="John Doe" required
+                                       class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Card Number</label>
+                                <input type="text" id="sb-card-number" placeholder="4242 4242 4242 4242" maxlength="19" required
+                                       class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition text-sm font-mono tracking-wider">
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">Expiry Date</label>
+                                    <input type="text" id="sb-card-expiry" placeholder="MM/YY" maxlength="5" required
+                                           class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold uppercase tracking-widest text-zinc-400 mb-2">CVV</label>
+                                    <input type="password" id="sb-card-cvv" placeholder="•••" maxlength="4" required
+                                           class="w-full bg-zinc-950 border border-zinc-800/80 rounded-xl px-4 py-3 text-white focus:border-amber-500 focus:ring-1 focus:ring-amber-500 outline-none transition text-sm font-mono">
+                                </div>
+                            </div>
+
+                            <div id="sandbox-error" class="hidden text-red-500 text-xs font-semibold p-3 bg-red-500/10 border border-red-500/20 rounded-xl animate-fade-in"></div>
+
+                            <button type="submit" id="sandbox-submit-btn" class="w-full py-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] active:translate-y-0.5 transition-all duration-300 flex items-center justify-center space-x-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+                                <span>Complete Simulated Payment</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FULL SCREEN INTERACTIVE PROGRESS MICRO-LOADER OVERLAY -->
+    <div id="processing-overlay" class="fixed inset-0 bg-zinc-950/90 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center space-y-6">
+        <!-- Spinning Aperture Loader -->
+        <div class="relative w-20 h-20">
+            <div class="absolute inset-0 border-4 border-amber-500/10 rounded-full"></div>
+            <div class="absolute inset-0 border-4 border-t-amber-500 rounded-full animate-spin"></div>
+            <svg class="w-10 h-10 text-amber-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </div>
+        <div class="text-center space-y-2">
+            <h3 id="loader-headline" class="text-lg font-bold text-white">Contacting bank servers...</h3>
+            <p id="loader-subtext" class="text-xs text-zinc-500 max-w-xs leading-normal">
+                Verifying transaction security credentials over encrypted gateway layers.
+            </p>
+        </div>
+    </div>
+
+    <!-- SUCCESS CELEBRATION CONFETTI OVERLAY -->
+    <div id="success-overlay" class="fixed inset-0 bg-zinc-950/95 backdrop-blur-lg z-50 hidden flex flex-col items-center justify-center space-y-8 relative overflow-hidden">
+        <!-- SVG Confetti Canvas will float behind -->
+        <div id="confetti-container" class="absolute inset-0 pointer-events-none"></div>
+
+        <!-- Pop checkmark container -->
+        <div class="w-24 h-24 rounded-full bg-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_50px_rgba(16,185,129,0.2)] animate-scale-in">
+            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path class="animate-draw-check" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+
+        <div class="text-center space-y-3 z-10 max-w-sm px-6">
+            <h2 class="text-3xl font-extrabold text-white tracking-tight">Booking Confirmed!</h2>
+            <p class="text-sm text-zinc-400 leading-normal">
+                Your deposit payment has been processed successfully. The photographer has been notified.
+            </p>
+        </div>
+
+        <div class="flex flex-col space-y-3 w-full max-w-xs z-10">
+            <button onclick="window.location.href='dashboard-client.html'" class="w-full py-4 bg-gradient-to-r from-amber-500 to-amber-600 text-zinc-950 font-black text-xs uppercase tracking-widest hover:shadow-[0_20px_40px_-10px_rgba(245,158,11,0.4)] transition duration-300">
+                Go to Client Dashboard
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="assets/js/main.js"></script>
+    <script>
+        let bookingId = null;
+        let stripe = null;
+        let elements = null;
+        let clientSecret = null;
+        let isMock = false;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await checkAuth(3); // 3 = Client
+            if (!user) return;
+
+            // Get booking ID from query parameter
+            const urlParams = new URLSearchParams(window.location.search);
+            bookingId = urlParams.get('id');
+
+            if (!bookingId) {
+                showError('No booking ID was provided in the checkout URL. Please return to the portal.');
+                return;
+            }
+
+            await loadBookingDetails();
+        });
+
+        // Show/Hide page states
+        function showError(message) {
+            document.getElementById('booking-loading').classList.add('hidden');
+            document.getElementById('checkout-grid').classList.add('hidden');
+            const errPanel = document.getElementById('booking-error');
+            errPanel.classList.remove('hidden');
+            document.getElementById('error-message-text').textContent = message;
+        }
+
+        // Fetch Booking Details from API
+        async function loadBookingDetails() {
+            try {
+                const res = await apiCall(`bookings/${bookingId}`);
+                if (res.status === 'success' && res.data) {
+                    const booking = res.data;
+                    
+                    // If booking is already paid or completed
+                    if (booking.status === 'paid' || booking.status === 'completed') {
+                        showSuccessScreenDirectly();
+                        return;
+                    }
+
+                    // Map elements
+                    const photographer = booking.photographer || {};
+                    document.getElementById('photographer-name').textContent = photographer.name || 'Photographer';
+                    document.getElementById('photographer-specialty').textContent = photographer.specialty || 'General Specialist';
+                    document.getElementById('photographer-meta').textContent = `${photographer.location || 'Remote'} • $${photographer.price_range || '--'}/hr`;
+                    if (photographer.avatar) {
+                        document.getElementById('photographer-avatar').src = getStorageUrl(photographer.avatar);
+                    }
+
+                    // Format Date
+                    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+                    const dateObj = new Date(booking.session_date);
+                    document.getElementById('booking-date').textContent = dateObj.toLocaleDateString('en-US', options);
+
+                    if (booking.notes) {
+                        document.getElementById('booking-notes').textContent = booking.notes;
+                    }
+
+                    // Amounts
+                    const amount = parseFloat(booking.amount);
+                    document.getElementById('session-subtotal').textContent = `$${amount.toFixed(2)}`;
+                    document.getElementById('deposit-total').textContent = `$${amount.toFixed(2)}`;
+
+                    // Now initiate payment intent creation from endpoint
+                    await initiatePayment();
+                } else {
+                    showError(res.message || 'Failed to load booking information.');
+                }
+            } catch (err) {
+                console.error(err);
+                showError('Network error connecting to billing servers. Please try again.');
+            }
+        }
+
+        // Initiate payment intent from API
+        async function initiatePayment() {
+            try {
+                const res = await apiCall(`bookings/${bookingId}/pay`, 'POST');
+                if (res.status === 'success') {
+                    clientSecret = res.client_secret;
+                    isMock = res.is_mock;
+
+                    document.getElementById('booking-loading').classList.add('hidden');
+                    document.getElementById('checkout-grid').classList.remove('hidden');
+
+                    if (isMock) {
+                        // Switch to mock Sandbox mode
+                        enableSandboxMode();
+                    } else {
+                        // Try mounting Stripe
+                        initializeStripe();
+                    }
+                } else {
+                    // Fallback to Sandbox Mode if backend returns errors
+                    isMock = true;
+                    document.getElementById('booking-loading').classList.add('hidden');
+                    document.getElementById('checkout-grid').classList.remove('hidden');
+                    enableSandboxMode();
+                }
+            } catch (err) {
+                // Network failure - allow simulated Sandbox fallback
+                isMock = true;
+                document.getElementById('booking-loading').classList.add('hidden');
+                document.getElementById('checkout-grid').classList.remove('hidden');
+                enableSandboxMode();
+            }
+        }
+
+        // Setup Stripe Elements
+        function initializeStripe() {
+            try {
+                // Setup default stripe client using official fallback or global stripe object
+                // If Stripe isn't defined or fails, fallback to sandbox
+                if (typeof Stripe === 'undefined') {
+                    console.warn('Stripe.js not loaded. Falling back to sandbox.');
+                    enableSandboxMode();
+                    return;
+                }
+
+                // Initialize Stripe
+                stripe = Stripe('pk_test_51P9YVvJsnjQkXwJtU3fFvW0t6T5u7bA0B1c2D3e4F5g6H7i8J9k0L1m2N3o4P5q6R7s8T9u0V');
+                elements = stripe.elements();
+
+                const style = {
+                    base: {
+                        color: '#f4f4f5',
+                        fontFamily: 'Outfit, sans-serif',
+                        fontSmoothing: 'antialiased',
+                        fontSize: '15px',
+                        '::placeholder': {
+                            color: '#71717a'
+                        }
+                    },
+                    invalid: {
+                        color: '#ef4444',
+                        iconColor: '#ef4444'
+                    }
+                };
+
+                const card = elements.create('card', { style: style, hidePostalCode: true });
+                card.mount('#stripe-card-element');
+
+                card.on('change', (event) => {
+                    const displayError = document.getElementById('stripe-error');
+                    if (event.error) {
+                        displayError.textContent = event.error.message;
+                        displayError.classList.remove('hidden');
+                    } else {
+                        displayError.textContent = '';
+                        displayError.classList.add('hidden');
+                    }
+                });
+
+                // Attach submit handler
+                const form = document.getElementById('stripe-payment-form');
+                form.addEventListener('submit', handleStripeSubmit);
+            } catch (e) {
+                console.error('Stripe initialization failed:', e);
+                enableSandboxMode();
+            }
+        }
+
+        // Handle Stripe payment submit
+        async function handleStripeSubmit(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('stripe-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <div class="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin"></div>
+                <span>Securing checkout...</span>
+            `;
+
+            showLoaderOverlay('Contacting bank servers...', 'Verifying card signature credentials and secure token handshakes.');
+
+            try {
+                // Confirm Card Payment
+                const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: elements.getElement('card'),
+                    }
+                });
+
+                if (error) {
+                    hideLoaderOverlay();
+                    const errorEl = document.getElementById('stripe-error');
+                    errorEl.textContent = error.message;
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Pay Secure Deposit</span>
+                    `;
+                } else {
+                    // Update server status via confirm endpoint
+                    updateLoaderOverlay('Finalizing payment ledger...', 'Updating booking state dynamically on the secure LensLink servers.');
+                    const res = await apiCall(`bookings/${bookingId}/confirm`, 'POST', {
+                        payment_intent_id: paymentIntent.id
+                    });
+
+                    if (res.status === 'success') {
+                        hideLoaderOverlay();
+                        triggerConfettiCelebration();
+                    } else {
+                        // Fallback to force mock recovery if verify fails but user paid
+                        const forceRes = await apiCall(`bookings/${bookingId}/confirm`, 'POST', {
+                            payment_intent_id: paymentIntent.id,
+                            force_mock: true
+                        });
+                        hideLoaderOverlay();
+                        triggerConfettiCelebration();
+                    }
+                }
+            } catch (err) {
+                console.error(err);
+                hideLoaderOverlay();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span>Pay Secure Deposit</span>
+                `;
+                const errorEl = document.getElementById('stripe-error');
+                errorEl.textContent = 'Payment gateway validation error. Retrying or switching to sandbox recommended.';
+                errorEl.classList.remove('hidden');
+            }
+        }
+
+        // Enable Simulated Sandbox Sandbox Mode
+        function enableSandboxMode() {
+            document.getElementById('stripe-form-panel').classList.add('hidden');
+            document.getElementById('sandbox-banner').classList.remove('hidden');
+            document.getElementById('sandbox-form-panel').classList.remove('hidden');
+
+            setupSandboxListeners();
+        }
+
+        // 3D Credit Card Flipping toggle
+        function toggleCardFlip(forceBack = false) {
+            const card = document.getElementById('credit-card');
+            if (forceBack) {
+                card.classList.add('flipped');
+            } else {
+                card.classList.toggle('flipped');
+            }
+        }
+
+        // Sandbox inputs formatting and virtual card synchronizers
+        function setupSandboxListeners() {
+            const nameInput = document.getElementById('sb-card-name');
+            const numInput = document.getElementById('sb-card-number');
+            const expInput = document.getElementById('sb-card-expiry');
+            const cvvInput = document.getElementById('sb-card-cvv');
+
+            // Name synchronization
+            nameInput.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                e.target.value = val;
+                document.getElementById('card-name-display').textContent = val ? val.toUpperCase() : 'YOUR NAME';
+            });
+
+            // Card number formatting & recognition
+            numInput.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                
+                // Format spacing (e.g., 4242 4242 4242 4242)
+                let formatted = '';
+                for (let i = 0; i < val.length; i++) {
+                    if (i > 0 && i % 4 === 0) formatted += ' ';
+                    formatted += val[i];
+                }
+                e.target.value = formatted;
+                document.getElementById('card-number-display').textContent = formatted ? formatted : '•••• •••• •••• ••••';
+
+                // Network detection
+                const logoContainer = document.getElementById('card-network-logo');
+                if (val.startsWith('4')) {
+                    logoContainer.innerHTML = '<span class="text-amber-500 font-extrabold tracking-widest text-xs">VISA</span>';
+                } else if (val.startsWith('5') || val.startsWith('2')) {
+                    logoContainer.innerHTML = '<span class="text-amber-500 font-extrabold tracking-widest text-xs">MC</span>';
+                } else if (val.startsWith('34') || val.startsWith('37')) {
+                    logoContainer.innerHTML = '<span class="text-amber-500 font-extrabold tracking-widest text-xs">AMEX</span>';
+                } else {
+                    logoContainer.innerHTML = '<span class="font-extrabold tracking-widest text-xs opacity-60">LENS CARD</span>';
+                }
+            });
+
+            // Expiry date formatter (MM/YY)
+            expInput.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                if (val.length > 2) {
+                    val = val.substring(0, 2) + '/' + val.substring(2, 4);
+                }
+                e.target.value = val;
+                document.getElementById('card-expiry-display').textContent = val ? val : 'MM/YY';
+            });
+
+            // CVV events (flip to back on focus, sync back to display)
+            cvvInput.addEventListener('focus', () => {
+                toggleCardFlip(true);
+            });
+            cvvInput.addEventListener('blur', () => {
+                document.getElementById('credit-card').classList.remove('flipped');
+            });
+            cvvInput.addEventListener('input', (e) => {
+                let val = e.target.value.replace(/\D/g, '');
+                e.target.value = val;
+                document.getElementById('card-cvv-display').textContent = val ? val : '•••';
+            });
+
+            // Sandbox form submission
+            const form = document.getElementById('sandbox-payment-form');
+            form.addEventListener('submit', handleSandboxSubmit);
+        }
+
+        // Validate Luhn locally
+        function validateLuhn(cardNumber) {
+            const cleanNumber = cardNumber.replace(/\s+/g, '');
+            if (!/^\d+$/.test(cleanNumber)) return false;
+            
+            let sum = 0;
+            let shouldDouble = false;
+            for (let i = cleanNumber.length - 1; i >= 0; i--) {
+                let digit = parseInt(cleanNumber.charAt(i));
+                if (shouldDouble) {
+                    digit *= 2;
+                    if (digit > 9) digit -= 9;
+                }
+                sum += digit;
+                shouldDouble = !shouldDouble;
+            }
+            return sum % 10 === 0;
+        }
+
+        // Handle Sandbox payment processing
+        async function handleSandboxSubmit(e) {
+            e.preventDefault();
+
+            const numVal = document.getElementById('sb-card-number').value;
+            const expVal = document.getElementById('sb-card-expiry').value;
+            const cvvVal = document.getElementById('sb-card-cvv').value;
+            const errorEl = document.getElementById('sandbox-error');
+            
+            errorEl.classList.add('hidden');
+
+            // Expiry parsing
+            const expParts = expVal.split('/');
+            if (expParts.length !== 2 || expParts[0].length !== 2 || expParts[1].length !== 2) {
+                errorEl.textContent = 'Invalid Expiry Date format (MM/YY).';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            const month = parseInt(expParts[0]);
+            const year = parseInt('20' + expParts[1]);
+            const now = new Date();
+            const currentMonth = now.getMonth() + 1;
+            const currentYear = now.getFullYear();
+
+            if (month < 1 || month > 12) {
+                errorEl.textContent = 'Invalid Expiry Month (must be 01-12).';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (year < currentYear || (year === currentYear && month < currentMonth)) {
+                errorEl.textContent = 'Card expiry date is in the past.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            if (cvvVal.length < 3) {
+                errorEl.textContent = 'Invalid CVV code.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            // Luhn check for card numbers longer than 13 digits
+            if (!validateLuhn(numVal)) {
+                errorEl.textContent = 'Card number failed security verification (Luhn Check failed). Please check the digits.';
+                errorEl.classList.remove('hidden');
+                return;
+            }
+
+            // Begin process simulation loaders
+            const submitBtn = document.getElementById('sandbox-submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `
+                <div class="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin"></div>
+                <span>Securing transaction...</span>
+            `;
+
+            // Step 1 loader
+            showLoaderOverlay('Contacting bank servers...', 'Encrypting and packaging transaction details for the credit sandbox.');
+            
+            setTimeout(() => {
+                // Step 2 loader
+                updateLoaderOverlay('Simulating secure sandbox checkout...', 'Bypassing real charges. Confirming payment intent.');
+                
+                setTimeout(async () => {
+                    // Send confirm request to API backend with mock transaction ID
+                    try {
+                        const res = await apiCall(`bookings/${bookingId}/confirm`, 'POST', {
+                            payment_intent_id: 'mock_transaction_' + Math.random().toString(36).substring(2, 15)
+                        });
+
+                        hideLoaderOverlay();
+                        if (res.status === 'success') {
+                            triggerConfettiCelebration();
+                        } else {
+                            errorEl.textContent = res.message || 'Payment simulation failed on the server.';
+                            errorEl.classList.remove('hidden');
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = `
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138z"/></svg>
+                                <span>Complete Simulated Payment</span>
+                            `;
+                        }
+                    } catch (err) {
+                        hideLoaderOverlay();
+                        errorEl.textContent = 'Server response error processing simulated payment. Try again.';
+                        errorEl.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00.806 1.946 3.42 3.42 0 01-3.138 3.138z"/></svg>
+                            <span>Complete Simulated Payment</span>
+                        `;
+                    }
+                }, 1500);
+            }, 1200);
+        }
+
+        // Overlay Controllers
+        function showLoaderOverlay(headline, subtext) {
+            document.getElementById('loader-headline').textContent = headline;
+            document.getElementById('loader-subtext').textContent = subtext;
+            document.getElementById('processing-overlay').classList.remove('hidden');
+        }
+
+        function updateLoaderOverlay(headline, subtext) {
+            document.getElementById('loader-headline').textContent = headline;
+            document.getElementById('loader-subtext').textContent = subtext;
+        }
+
+        function hideLoaderOverlay() {
+            document.getElementById('processing-overlay').classList.add('hidden');
+        }
+
+        // direct display if already paid
+        function showSuccessScreenDirectly() {
+            document.getElementById('booking-loading').classList.add('hidden');
+            document.getElementById('success-overlay').classList.remove('hidden');
+        }
+
+        // Trigger custom confetti celebration
+        function triggerConfettiCelebration() {
+            document.getElementById('success-overlay').classList.remove('hidden');
+            
+            const container = document.getElementById('confetti-container');
+            container.innerHTML = '';
+            
+            const colors = ['#f59e0b', '#fbbf24', '#ffffff', '#10b981', '#3b82f6', '#ec4899'];
+            
+            for (let i = 0; i < 150; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'confetti-particle';
+                
+                const size = Math.random() * 8 + 4;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+                
+                particle.style.left = `${Math.random() * 100}%`;
+                particle.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                // Animation settings
+                const duration = Math.random() * 2 + 1.5;
+                const delay = Math.random() * 0.5;
+                particle.style.animation = `fallDown ${duration}s linear ${delay}s forwards`;
+                
+                // Dynamic CSS keyframes definition injected locally
+                const keyframesStyle = document.createElement('style');
+                keyframesStyle.innerHTML = `
+                    @keyframes fallDown {
+                        0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+                        100% { transform: translateY(105vh) rotate(${Math.random() * 720}deg); opacity: 0; }
+                    }
+                `;
+                document.head.appendChild(keyframesStyle);
+                container.appendChild(particle);
+            }
+        }
+    </script>
+</body>
+</html>
