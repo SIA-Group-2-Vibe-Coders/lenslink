@@ -19,13 +19,8 @@ Broadcast::channel('chat.{galleryId}', function ($user, $galleryId) {
         return false;
     }
 
-    // Photographer who owns the gallery
-    if ($user->role_id == 2 && $gallery->photographer_id == $user->id) {
-        return true;
-    }
-
-    // Client assigned to the gallery
-    if ($user->role_id == 3 && $gallery->client_id == $user->id) {
+    // Owner or assigned client of the gallery
+    if ($gallery->photographer_id == $user->id || $gallery->client_id == $user->id) {
         return true;
     }
 

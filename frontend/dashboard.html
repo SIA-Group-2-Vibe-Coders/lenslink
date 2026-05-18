@@ -33,10 +33,8 @@
                 if (user && user.role_id) {
                     if (user.role_id == 1) {
                         window.location.replace('admin.html');
-                    } else if (user.role_id == 2) {
+                    } else {
                         window.location.replace('dashboard-photographer.html');
-                    } else if (user.role_id == 3) {
-                        window.location.replace('dashboard-client.html');
                     }
                 }
             }
@@ -91,14 +89,8 @@
                     const role = res.data.role_id;
                     if (role == 1) {
                         window.location.replace('admin.html');
-                    } else if (role == 2) {
-                        window.location.replace('dashboard-photographer.html');
-                    } else if (role == 3) {
-                        window.location.replace('dashboard-client.html');
                     } else {
-                        // Fallback for unexpected roles
-                        console.error('Unknown role:', role);
-                        window.location.replace('login.html');
+                        window.location.replace('dashboard-photographer.html');
                     }
                 } else {
                     // Invalid token or session error

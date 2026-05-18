@@ -21,10 +21,8 @@ function goToPortal() {
     const roleId = parseInt(currentUser.role_id);
     if (roleId === 1) {
         window.location.href = 'admin.html';
-    } else if (roleId === 2) {
-        window.location.href = 'dashboard-photographer.html';
     } else {
-        window.location.href = 'dashboard-client.html';
+        window.location.href = 'dashboard-photographer.html';
     }
 }
 

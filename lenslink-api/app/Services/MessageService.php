@@ -116,8 +116,8 @@ class MessageService
     private function authorizeGalleryAccess(User $user, int $galleryId): void
     {
         $gallery = Gallery::findOrFail($galleryId);
-        if ($user->role_id == 2 && $gallery->photographer_id !== $user->id) {
-            abort(403, 'You do not own this gallery.');
+        if ($user->role_id != 1 && $gallery->photographer_id !== $user->id && $gallery->client_id !== $user->id) {
+            abort(403, 'Unauthorized access to this gallery.');
         }
     }
 }

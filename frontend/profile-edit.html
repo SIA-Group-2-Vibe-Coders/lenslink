@@ -103,12 +103,8 @@
             if (currentUser) {
                 // Set back link based on role
                 const backLink = document.getElementById('backToDashboard');
-                if (currentUser.role_id === 2) {
-                    backLink.href = 'dashboard-photographer.html';
-                    document.getElementById('photographerFields').classList.remove('hidden');
-                } else if (currentUser.role_id === 3) {
-                    backLink.href = 'dashboard-client.html';
-                }
+                backLink.href = 'dashboard-photographer.html';
+                document.getElementById('photographerFields').classList.remove('hidden');
 
                 // Populate form fields
                 document.getElementById('name').value = currentUser.name || '';
