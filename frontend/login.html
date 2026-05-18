@@ -116,11 +116,8 @@
                     localStorage.setItem('auth_token', syncRes.token || 'firebase_session');
                     localStorage.setItem('user', JSON.stringify(syncRes.user));
                     
-                    if (syncRes.user.role_id == 1) {
-                        window.location.href = 'admin.html';
-                    } else {
-                        window.location.href = 'dashboard.html';
-                    }
+                    // Route all to dashboard.html which handles role-based routing dynamically
+                    window.location.href = 'dashboard.html';
                 }
             } catch (error) {
                 console.error("Firebase Login Error:", error);
