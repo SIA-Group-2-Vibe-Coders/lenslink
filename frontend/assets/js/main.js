@@ -90,10 +90,20 @@ async function checkAuth(requiredRole = null) {
             return null;
         }
 
-        if (requiredRole && res.data.role_id != requiredRole) {
-            alert('Unauthorized access');
-            window.location.href = 'login.html';
-            return null;
+        if (requiredRole) {
+            const userRole = parseInt(res.data.role_id);
+            if (requiredRole === 2) {
+                // Allow both Photographers (2) and legacy Clients (3)
+                if (userRole !== 2 && userRole !== 3) {
+                    alert('Unauthorized access');
+                    window.location.href = 'login.html';
+                    return null;
+                }
+            } else if (userRole !== requiredRole) {
+                alert('Unauthorized access');
+                window.location.href = 'login.html';
+                return null;
+            }
         }
 
         return res.data;
