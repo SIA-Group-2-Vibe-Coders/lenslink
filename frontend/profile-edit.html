@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - LensLink</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col">
+    
+    <nav class="border-b border-zinc-800/50 glass-nav sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-amber-400 to-amber-600 flex items-center justify-center text-zinc-950 font-bold text-xl">L</div>
+                <span class="text-xl font-semibold tracking-tight text-white">Edit Profile</span>
+            </div>
+            <div class="flex items-center space-x-6">
+                <a href="#" id="backToDashboard" class="text-sm font-medium text-amber-500 hover:text-amber-400 transition">Back to Dashboard</a>
+                <button onclick="logout()" class="text-sm font-medium text-zinc-400 hover:text-white transition">Sign Out</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="flex-grow max-w-3xl mx-auto w-full px-6 py-8">
+        <h1 class="text-3xl font-bold text-white mb-2">My Profile</h1>
+        <p class="text-zinc-400 mb-8">Update your personal information and portfolio details.</p>
+
+        <form id="profileForm" class="glass-panel p-8 rounded-xl border border-zinc-800/50" enctype="multipart/form-data">
+            
+            <div id="alertMessage" class="hidden mb-6 p-4 rounded-lg text-sm font-medium"></div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Avatar -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">Avatar / Profile Picture</label>
+                    <div class="flex items-center gap-4">
+                        <img id="avatarPreview" src="https://via.placeholder.com/150" class="w-16 h-16 rounded-full object-cover border border-zinc-700" alt="Avatar">
+                        <input type="file" id="avatarInput" name="avatar" accept="image/*" class="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-500 file:text-zinc-950 hover:file:bg-amber-400 transition cursor-pointer">
+                    </div>
+                </div>
+
+                <!-- Cover Photo -->
+                <div>
+                    <label class="block text-sm font-medium text-zinc-300 mb-2">Cover Photo</label>
+                    <div class="flex items-center gap-4">
+                        <img id="coverPreview" src="https://via.placeholder.com/300x100" class="w-24 h-12 rounded object-cover border border-zinc-700" alt="Cover Photo">
+                        <input type="file" id="coverInput" name="cover_photo" accept="image/*" class="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-zinc-800 file:text-white hover:file:bg-zinc-700 transition cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Name -->
+            <div class="mb-6">
+                <label for="name" class="block text-sm font-medium text-zinc-300 mb-2">Full Name</label>
+                <input type="text" id="name" name="name" class="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" placeholder="Your full name">
+            </div>
+
+            <!-- Bio -->
+            <div class="mb-6">
+                <label for="bio" class="block text-sm font-medium text-zinc-300 mb-2">Bio</label>
+                <textarea id="bio" name="bio" rows="4" class="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" placeholder="Tell us about yourself..."></textarea>
+            </div>
+
+            <!-- Location -->
+            <div class="mb-6">
+                <label for="location" class="block text-sm font-medium text-zinc-300 mb-2">Location</label>
+                <input type="text" id="location" name="location" class="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" placeholder="e.g. New York, NY">
+            </div>
+
+            <!-- Photographer Specific Fields -->
+            <div id="photographerFields" class="hidden">
+                <h3 class="text-lg font-bold text-white mb-4 pt-4 border-t border-zinc-800/50">Photographer Details</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div>
+                        <label for="specialty" class="block text-sm font-medium text-zinc-300 mb-2">Specialty</label>
+                        <input type="text" id="specialty" name="specialty" class="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" placeholder="e.g. Wedding, Portrait">
+                    </div>
+                    <div>
+                        <label for="price_range" class="block text-sm font-medium text-zinc-300 mb-2">Price Range</label>
+                        <input type="text" id="price_range" name="price_range" class="w-full bg-zinc-900/50 border border-zinc-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition" placeholder="e.g. $1000 - $3000">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-6 border-t border-zinc-800/50 mt-6">
+                <button type="submit" id="saveButton" class="bg-amber-500 text-zinc-950 px-6 py-2.5 rounded-lg font-bold hover:bg-amber-400 transition flex items-center">
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </form>
+    </main>
+
+    <script src="assets/js/main.js"></script>
+    <script>
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check auth (no specific role required, works for both 2 and 3)
+            currentUser = await checkAuth();
+            if (currentUser) {
+                // Set back link based on role
+                const backLink = document.getElementById('backToDashboard');
+                if (currentUser.role_id === 2) {
+                    backLink.href = 'dashboard-photographer.html';
+                    document.getElementById('photographerFields').classList.remove('hidden');
+                } else if (currentUser.role_id === 3) {
+                    backLink.href = 'dashboard-client.html';
+                }
+
+                // Populate form fields
+                document.getElementById('name').value = currentUser.name || '';
+                document.getElementById('bio').value = currentUser.bio || '';
+                document.getElementById('location').value = currentUser.location || '';
+                
+                if (currentUser.role_id === 2) {
+                    document.getElementById('specialty').value = currentUser.specialty || '';
+                    document.getElementById('price_range').value = currentUser.price_range || '';
+                }
+
+                if (currentUser.avatar) {
+                    document.getElementById('avatarPreview').src = currentUser.avatar.startsWith('http') ? currentUser.avatar : getStorageUrl(currentUser.avatar);
+                }
+                if (currentUser.cover_photo) {
+                    document.getElementById('coverPreview').src = currentUser.cover_photo.startsWith('http') ? currentUser.cover_photo : getStorageUrl(currentUser.cover_photo);
+                }
+            }
+        });
+
+        // Image Previews
+        document.getElementById('avatarInput').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        document.getElementById('coverInput').addEventListener('change', function(e) {
+            if (this.files && this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('coverPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // Form Submit
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const saveButton = document.getElementById('saveButton');
+            const originalText = saveButton.innerHTML;
+            saveButton.innerHTML = '<span>Saving...</span>';
+            saveButton.disabled = true;
+
+            const formData = new FormData();
+            
+            // Append text fields
+            formData.append('name', document.getElementById('name').value);
+            formData.append('bio', document.getElementById('bio').value);
+            formData.append('location', document.getElementById('location').value);
+            
+            if (currentUser && currentUser.role_id === 2) {
+                formData.append('specialty', document.getElementById('specialty').value);
+                formData.append('price_range', document.getElementById('price_range').value);
+            }
+
+            // Append files if selected
+            const avatarFile = document.getElementById('avatarInput').files[0];
+            if (avatarFile) formData.append('avatar', avatarFile);
+
+            const coverFile = document.getElementById('coverInput').files[0];
+            if (coverFile) formData.append('cover_photo', coverFile);
+
+            const alertBox = document.getElementById('alertMessage');
+            alertBox.classList.add('hidden');
+            alertBox.classList.remove('bg-red-500/10', 'text-red-500', 'bg-emerald-500/10', 'text-emerald-500');
+
+            try {
+                // We use POST with FormData
+                const res = await apiCall('profile/update', 'POST', formData);
+                
+                if (res.status === 'success') {
+                    alertBox.textContent = 'Profile updated successfully!';
+                    alertBox.classList.add('bg-emerald-500/10', 'text-emerald-500');
+                    alertBox.classList.remove('hidden');
+                    
+                    // Update current user data if needed
+                    currentUser = res.data;
+                } else {
+                    alertBox.textContent = res.message || 'Failed to update profile.';
+                    alertBox.classList.add('bg-red-500/10', 'text-red-500');
+                    alertBox.classList.remove('hidden');
+                }
+            } catch (err) {
+                alertBox.textContent = 'An error occurred while updating the profile.';
+                alertBox.classList.add('bg-red-500/10', 'text-red-500');
+                alertBox.classList.remove('hidden');
+            } finally {
+                saveButton.innerHTML = originalText;
+                saveButton.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
