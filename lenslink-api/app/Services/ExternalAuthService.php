@@ -32,6 +32,7 @@ class ExternalAuthService
                 'name' => $firebaseUser->displayName ?? 'Firebase User',
                 'password' => Hash::make(Str::random(24)), // Random password for social users
                 'avatar' => $firebaseUser->photoUrl,
+                'role_id' => 2,
             ]
         );
 

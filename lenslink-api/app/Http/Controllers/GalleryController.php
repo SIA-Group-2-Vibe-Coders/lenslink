@@ -17,14 +17,70 @@ class GalleryController extends Controller
     /**
      * GET /gallery
      */
-    public function galleries()
+    public function galleries(Request $request)
     {
-        $galleries = $this->galleryService->getAllGalleries();
+        $photographerId = $request->query('photographer_id');
+        $galleries = $this->galleryService->getAllGalleries($photographerId ? (int)$photographerId : null);
 
         return response()->json([
             'status' => 'success',
             'data'   => $galleries
         ]);
+    }
+
+    /**
+     * POST /gallery
+     */
+    public function storeGallery(Request $request)
+    {
+        $request->validate([
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'is_public'   => 'nullable',
+            'cover_image' => 'nullable|image|mimes:jpeg,png,webp|max:5120',
+            'client_id'   => 'nullable|exists:users,id',
+        ]);
+
+        $photographer = $request->user();
+
+        $gallery = $this->galleryService->createGallery(
+            $request->all(),
+            $photographer->id
+        );
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Gallery created successfully',
+            'data'    => $gallery
+        ], 201);
+    }
+
+    /**
+     * POST /albums
+     */
+    public function storeAlbum(Request $request)
+    {
+        $request->validate([
+            'title'      => 'required|string|max:255',
+            'gallery_id' => 'required|exists:galleries,id',
+        ]);
+
+        // Ensure the gallery belongs to the logged-in photographer
+        $gallery = \App\Models\Gallery::findOrFail($request->gallery_id);
+        if ($gallery->photographer_id !== $request->user()->id) {
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Unauthorized to add albums to this gallery'
+            ], 403);
+        }
+
+        $album = $this->galleryService->createAlbum($request->all());
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Album created successfully',
+            'data'    => $album
+        ], 201);
     }
 
     /**

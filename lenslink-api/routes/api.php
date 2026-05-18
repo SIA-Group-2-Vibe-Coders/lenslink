@@ -45,6 +45,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/images/upload', [ImageUploadController::class, 'upload']);
     Route::post('/images/archive', [ImageUploadController::class, 'archive']);
 
+    // Gallery & Album Management
+    Route::post('/gallery', [GalleryController::class, 'storeGallery']);
+    Route::post('/albums', [GalleryController::class, 'storeAlbum']);
+
     // Profile Update
     Route::post('/profile/update', [AuthController::class, 'updateProfile']);
 
