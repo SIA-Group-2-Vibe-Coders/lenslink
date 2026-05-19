@@ -159,9 +159,9 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="param-name">name</span><span class="param-required">required</span></td>
+                                    <td><span class="param-name">full_name</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">The full name of the user. Min length: 3.</td>
+                                    <td class="param-desc">The full name of the user. E.g., <code>"zinoel zin"</code>.</td>
                                 </tr>
                                 <tr>
                                     <td><span class="param-name">email</span><span class="param-required">required</span></td>
@@ -171,17 +171,12 @@
                                 <tr>
                                     <td><span class="param-name">password</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Min length: 8 characters. Must match confirmation.</td>
+                                    <td class="param-desc">Min length: 10 characters.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="param-name">password_confirmation</span><span class="param-required">required</span></td>
-                                    <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Repeated password for validation.</td>
-                                </tr>
-                                <tr>
-                                    <td><span class="param-name">role</span><span class="param-required">required</span></td>
-                                    <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Must be either <code>"client"</code> or <code>"photographer"</code>.</td>
+                                    <td><span class="param-name">role_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc"><code>2</code> = photographer &nbsp;|&nbsp; <code>1</code> = client.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -284,34 +279,34 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="param-name">name</span><span class="param-optional">optional</span></td>
-                                    <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Update the display name.</td>
-                                </tr>
-                                <tr>
                                     <td><span class="param-name">bio</span><span class="param-optional">optional</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">A brief biography.</td>
+                                    <td class="param-desc">A brief biography or description.</td>
                                 </tr>
                                 <tr>
                                     <td><span class="param-name">specialty</span><span class="param-optional">optional</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">E.g., "Wedding", "Portrait", "Landscape".</td>
+                                    <td class="param-desc">E.g., <code>"Portrait"</code>, <code>"Wedding"</code>, <code>"Landscape"</code>.</td>
                                 </tr>
                                 <tr>
                                     <td><span class="param-name">location</span><span class="param-optional">optional</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Primary operating city.</td>
+                                    <td class="param-desc">Primary operating city. E.g., <code>"New York, NY"</code>.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="param-name">rate</span><span class="param-optional">optional</span></td>
-                                    <td><span class="param-type">numeric</span></td>
-                                    <td class="param-desc">Hourly booking fee in USD.</td>
+                                    <td><span class="param-name">price_range</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Price tier indicator. E.g., <code>"$"</code>, <code>"$$"</code>, <code>"$$$"</code>.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="param-name">profile_picture</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-name">avatar</span><span class="param-optional">optional</span></td>
                                     <td><span class="param-type">file</span></td>
-                                    <td class="param-desc">Image file (jpeg, png, webp) up to 2MB. Uploaded directly to Cloudinary.</td>
+                                    <td class="param-desc">Avatar / profile image file. Uploaded to Cloudinary.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">cover</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">file</span></td>
+                                    <td class="param-desc">Cover / banner image file. Uploaded to Cloudinary.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -578,9 +573,9 @@
                     <div class="endpoint-header">
                         <span class="method-tag get">GET</span>
                         <span class="endpoint-path">/posts</span>
-                        <span class="endpoint-auth-indicator public">Public Route</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
                     </div>
-                    <p class="endpoint-desc">Fetches the social interaction feed, displaying structured posts created by photographers with likes, comments counts, and media URLs.</p>
+                    <p class="endpoint-desc">List all social feed posts. Requires authentication.</p>
                 </section>
 
                 <!-- POST /posts -->
@@ -604,14 +599,19 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="param-name">body</span><span class="param-required">required</span></td>
+                                    <td><span class="param-name">caption</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Main text body of the social post.</td>
+                                    <td class="param-desc">Caption text for the post. E.g., <code>"Beautiful morning in the hills"</code>.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">location</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Location tag for the post. E.g., <code>"Greenville"</code>.</td>
                                 </tr>
                                 <tr>
                                     <td><span class="param-name">image</span><span class="param-optional">optional</span></td>
                                     <td><span class="param-type">file</span></td>
-                                    <td class="param-desc">Optional post background/showcase photo up to 2MB.</td>
+                                    <td class="param-desc">Optional image file to attach to the post.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -659,9 +659,9 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="param-name">body</span><span class="param-required">required</span></td>
+                                    <td><span class="param-name">content</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">The reply statement content text.</td>
+                                    <td class="param-desc">The comment text. E.g., <code>"Stunning colors in this shot!"</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -699,9 +699,9 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="param-name">user_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-name">receiver_id</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">integer</span></td>
-                                    <td class="param-desc">The database ID of the chat counterparty.</td>
+                                    <td class="param-desc">The user ID to retrieve message history with. E.g., <code>1</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -731,12 +731,12 @@
                                 <tr>
                                     <td><span class="param-name">receiver_id</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">integer</span></td>
-                                    <td class="param-desc">Recipient user ID.</td>
+                                    <td class="param-desc">The user ID of the message recipient. E.g., <code>1</code>.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="param-name">message</span><span class="param-required">required</span></td>
+                                    <td><span class="param-name">body</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">The text body of the chat.</td>
+                                    <td class="param-desc">The message text body. E.g., <code>"Hello from Postman!"</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -801,27 +801,22 @@
                                 <tr>
                                     <td><span class="param-name">photographer_id</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">integer</span></td>
-                                    <td class="param-desc">Photographer ID.</td>
+                                    <td class="param-desc">The ID of the photographer to book. E.g., <code>2</code>.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="param-name">booking_date</span><span class="param-required">required</span></td>
+                                    <td><span class="param-name">session_date</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Date/time in ISO-8601 or YYYY-MM-DD standard format.</td>
+                                    <td class="param-desc">Session date in <code>YYYY-MM-DD</code> format. E.g., <code>"2026-06-01"</code>.</td>
                                 </tr>
                                 <tr>
-                                    <td><span class="param-name">duration</span><span class="param-required">required</span></td>
-                                    <td><span class="param-type">integer</span></td>
-                                    <td class="param-desc">Duration of the photoshoot in hours.</td>
-                                </tr>
-                                <tr>
-                                    <td><span class="param-name">location</span><span class="param-required">required</span></td>
-                                    <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">The address for the photoshoot.</td>
+                                    <td><span class="param-name">amount</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">numeric</span></td>
+                                    <td class="param-desc">Total booking amount in USD. E.g., <code>150</code>.</td>
                                 </tr>
                                 <tr>
                                     <td><span class="param-name">notes</span><span class="param-optional">optional</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Extra instructions or requirements.</td>
+                                    <td class="param-desc">Extra session instructions. E.g., <code>"Outdoor summer session"</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -871,7 +866,7 @@
                                 <tr>
                                     <td><span class="param-name">status</span><span class="param-required">required</span></td>
                                     <td><span class="param-type">string</span></td>
-                                    <td class="param-desc">Must be either <code>"approved"</code> or <code>"rejected"</code>.</td>
+                                    <td class="param-desc">Allowed values: <code>"accepted"</code> | <code>"declined"</code> | <code>"completed"</code> | <code>"cancelled"</code>.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -951,8 +946,8 @@
         // Host Configuration
         let currentEnv = 'prod';
         const hosts = {
-            local: 'http://localhost:8000/api',
-            prod: 'https://lenslink-api.onrender.com/api'
+            local: 'http://127.0.0.1:8000/api',
+            prod: 'https://lenslink-api-3w31.onrender.com/api'
         };
 
         // Active Language Code Switcher State
@@ -993,40 +988,40 @@
             'post-register': {
                 title: 'POST /register',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/register" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '{\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "password": "securepassword123",\n    "password_confirmation": "securepassword123",\n    "role": "photographer"\n  }'`,
-                    js: `fetch("{HOST}/register", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json"\n  },\n  body: JSON.stringify({\n    name: "Jane Doe",\n    email: "jane@example.com",\n    password: "securepassword123",\n    password_confirmation: "securepassword123",\n    role: "photographer"\n  })\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->post('{HOST}/register', [\n    'name' => 'Jane Doe',\n    'email' => 'jane@example.com',\n    'password' => 'securepassword123',\n    'password_confirmation' => 'securepassword123',\n    'role' => 'photographer'\n]);\n\n$data = $response->json();`
+                    curl: `curl -X POST "{HOST}/register" \\\n  -H "Accept: application/json" \\\n  -F "full_name=Jane Doe" \\\n  -F "email=jane@example.com" \\\n  -F "password=securepassword123" \\\n  -F "role_id=2"`,
+                    js: `const form = new FormData();\nform.append("full_name", "Jane Doe");\nform.append("email", "jane@example.com");\nform.append("password", "securepassword123");\nform.append("role_id", "2"); // 2=photographer, 1=client\n\nfetch("{HOST}/register", {\n  method: "POST",\n  headers: { "Accept": "application/json" },\n  body: form\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->asForm()->post('{HOST}/register', [\n    'full_name' => 'Jane Doe',\n    'email'     => 'jane@example.com',\n    'password'  => 'securepassword123',\n    'role_id'   => 2 // 2=photographer, 1=client\n]);\n\n$data = $response->json();`
                 },
                 responses: {
                     status: '201 Created',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "User registered successfully",\n  "token": "1|u7YhT9p2qK1lS92...",\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "role": "photographer",\n    "created_at": "2026-05-19T08:00:00.000000Z"\n  }\n}`
+                    body: `{\n  "message": "User registered successfully.",\n  "user": {\n    "id": 12,\n    "full_name": "Jane Doe",\n    "email": "jane@example.com"\n  },\n  "token": "10|abc123..."\n}`
                 }
             },
             'post-login': {
                 title: 'POST /login',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/login" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '{\n    "email": "jane@example.com",\n    "password": "securepassword123"\n  }'`,
-                    js: `fetch("{HOST}/login", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json"\n  },\n  body: JSON.stringify({\n    email: "jane@example.com",\n    password: "securepassword123"\n  })\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->post('{HOST}/login', [\n    'email' => 'jane@example.com',\n    'password' => 'securepassword123'\n]);\n\n$data = $response->json();`
+                    curl: `curl -X POST "{HOST}/login" \\\n  -H "Accept: application/json" \\\n  -F "email=jane@example.com" \\\n  -F "password=securepassword123"`,
+                    js: `const form = new FormData();\nform.append("email", "jane@example.com");\nform.append("password", "securepassword123");\n\nfetch("{HOST}/login", {\n  method: "POST",\n  headers: { "Accept": "application/json" },\n  body: form\n})\n.then(res => res.json())\n.then(data => {\n  // Token is returned — store it for subsequent requests\n  localStorage.setItem("token", data.token);\n  console.log(data);\n});`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->asForm()->post('{HOST}/login', [\n    'email'    => 'jane@example.com',\n    'password' => 'securepassword123'\n]);\n\n$data  = $response->json();\n$token = $data['token']; // save for auth`
                 },
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "status": "success",\n  "token": "2|j9HhK8o9fG1qY77...",\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "role": "photographer"\n  }\n}`
+                    body: `{\n  "token": "10|xntnqlPEXZYhwrvzcgoC07vWq7ZYdyNE6rgddxfBaf6a68df",\n  "user": {\n    "id": 1,\n    "full_name": "zinoel zin",\n    "role_id": 2\n  }\n}`
                 }
             },
             'post-firebase': {
                 title: 'POST /auth/firebase',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/auth/firebase" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '{\n    "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6..."\n  }'`,
-                    js: `fetch("{HOST}/auth/firebase", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json"\n  },\n  body: JSON.stringify({\n    token: "eyJhbGciOiJSUzI1NiIsImtpZCI6..."\n  })\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->post('{HOST}/auth/firebase', [\n    'token' => 'eyJhbGciOiJSUzI1NiIsImtpZCI6...'\n]);`
+                    curl: `curl -X POST "{HOST}/auth/firebase" \\\n  -H "Accept: application/json" \\\n  -F "id_token=eyJhbGciOiJSUzI1NiIsImtpZCI6..."`,
+                    js: `// Get the Firebase ID token first:\nconst idToken = await firebase.auth().currentUser.getIdToken(true);\n\nconst form = new FormData();\nform.append("id_token", idToken);\n\nfetch("{HOST}/auth/firebase", {\n  method: "POST",\n  headers: { "Accept": "application/json" },\n  body: form\n})\n.then(res => res.json())\n.then(data => {\n  // Exchange Firebase token for LensLink Sanctum token\n  localStorage.setItem("token", data.token);\n  console.log(data);\n});`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->asForm()->post('{HOST}/auth/firebase', [\n    'id_token' => $firebaseIdToken // from Firebase Admin SDK\n]);`
                 },
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "status": "success",\n  "token": "3|L90pKq12fO97jU1...",\n  "user": {\n    "id": 15,\n    "name": "Alex Smith",\n    "email": "alex@gmail.com",\n    "role": "client"\n  }\n}`
+                    body: `{\n  "token": "70|LH2M30vhGlBkGUbYKdOuS8uRzRN9...",\n  "user": {\n    "id": 9,\n    "email": "user@gmail.com",\n    "full_name": "Google User"\n  },\n  "is_new_user": false\n}`
                 }
             },
             'get-profile': {
@@ -1039,20 +1034,28 @@
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "role": "photographer",\n    "bio": "Capturing architectural wonders.",\n    "location": "Singapore",\n    "rate": 150.00,\n    "profile_picture": "https://res.cloudinary.com/lenslink/image/upload/v1/profiles/jane.jpg"\n  }\n}`
+                    body: `{\n  "id": 12,\n  "full_name": "Jane Doe",\n  "email": "jane@example.com",\n  "bio": "Capturing architectural wonders.",\n  "specialty": "Wedding",\n  "location": "Singapore",\n  "price_range": "$$",\n  "avatar_url": "https://res.cloudinary.com/lenslink/image/upload/v1/avatars/jane.jpg",\n  "cover_url": "https://res.cloudinary.com/lenslink/image/upload/v1/covers/jane_cover.jpg"\n}`
                 }
             },
             'post-profile-update': {
                 title: 'POST /profile/update',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/profile/update" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -F "bio=Award winning wedding and portrait photographer." \\\n  -F "rate=175" \\\n  -F "profile_picture=@/path/to/my_face.png"`,
-                    js: `const form = new FormData();\nform.append("bio", "Award winning wedding photographer.");\nform.append("rate", "175");\nform.append("profile_picture", fileInput.files[0]);\n\nfetch("{HOST}/profile/update", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n})\n.then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/profile/update', [\n    'bio' => 'Award winning portrait artist.',\n    'rate' => 175,\n    'profile_picture' => Http::attach(\n        'profile_picture', file_get_contents('/path/to/img.png'), 'img.png'\n    )\n]);`
+                    curl: `curl -X POST "{HOST}/profile/update" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -F "bio=Award winning wedding photographer." \\\
+  -F "specialty=Wedding" \\\
+  -F "location=New York, NY" \\\
+  -F "price_range=$$" \\\
+  -F "avatar=@/path/to/avatar.png" \\\
+  -F "cover=@/path/to/cover.jpg"`,
+                    js: `const form = new FormData();\nform.append("bio", "Award winning wedding photographer.");\nform.append("specialty", "Wedding");\nform.append("location", "New York, NY");\nform.append("price_range", "$$");\nform.append("avatar", avatarInput.files[0]);\nform.append("cover", coverInput.files[0]);\n\nfetch("{HOST}/profile/update", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n})\n.then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/profile/update', [\n    'bio'         => 'Award winning wedding photographer.',\n    'specialty'   => 'Wedding',\n    'location'    => 'New York, NY',\n    'price_range' => '$$',\n    'avatar'      => Http::attach('avatar', file_get_contents('/path/to/avatar.png'), 'avatar.png'),\n    'cover'       => Http::attach('cover',  file_get_contents('/path/to/cover.jpg'),  'cover.jpg')\n]);`
                 },
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Profile updated successfully",\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "bio": "Award winning wedding and portrait photographer.",\n    "rate": 175.00,\n    "profile_picture": "https://res.cloudinary.com/lenslink/image/upload/v2/profiles/jane_updated.jpg"\n  }\n}`
+                    body: `{\n  "message": "Profile updated successfully.",\n  "user": {\n    "id": 12,\n    "full_name": "Jane Doe",\n    "bio": "Award winning wedding photographer.",\n    "specialty": "Wedding",\n    "location": "New York, NY",\n    "price_range": "$$",\n    "avatar_url": "https://res.cloudinary.com/lenslink/image/upload/v2/avatars/jane.jpg",\n    "cover_url": "https://res.cloudinary.com/lenslink/image/upload/v2/covers/jane_cover.jpg"\n  }\n}`
                 }
             },
             'post-logout': {
@@ -1071,7 +1074,8 @@
             'get-photographers': {
                 title: 'GET /photographers',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/photographers?search=wedding&location=Singapore" \\\n  -H "Accept: application/json"`,
+                    curl: `curl -X GET "{HOST}/photographers?search=wedding&location=Singapore" \\\
+  -H "Accept: application/json"`,
                     js: `fetch("{HOST}/photographers?search=wedding&location=Singapore", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json"\n  }\n})\n.then(res => res.json());`,
                     php: `$response = Http::get('{HOST}/photographers', [\n    'search' => 'wedding',\n    'location' => 'Singapore'\n]);`
                 },
@@ -1084,7 +1088,8 @@
             'get-photographer-detail': {
                 title: 'GET /photographers/{id}',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/photographers/12" \\\n  -H "Accept: application/json"`,
+                    curl: `curl -X GET "{HOST}/photographers/12" \\\
+  -H "Accept: application/json"`,
                     js: `fetch("{HOST}/photographers/12", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json"\n  }\n})\n.then(res => res.json());`,
                     php: `$response = Http::get('{HOST}/photographers/12');`
                 },
@@ -1097,7 +1102,8 @@
             'get-search-location': {
                 title: 'GET /search/location',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/search/location?query=Marina+Bay+Sands" \\\n  -H "Accept: application/json"`,
+                    curl: `curl -X GET "{HOST}/search/location?query=Marina+Bay+Sands" \\\
+  -H "Accept: application/json"`,
                     js: `fetch("{HOST}/search/location?query=Marina+Bay+Sands", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json"\n  }\n})\n.then(res => res.json());`,
                     php: `$response = Http::get('{HOST}/search/location', [\n    'query' => 'Marina Bay Sands'\n]);`
                 },
@@ -1110,7 +1116,8 @@
             'get-gallery': {
                 title: 'GET /gallery',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/gallery" \\\n  -H "Accept: application/json"`,
+                    curl: `curl -X GET "{HOST}/gallery" \\\
+  -H "Accept: application/json"`,
                     js: `fetch("{HOST}/gallery", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
                     php: `$response = Http::get('{HOST}/gallery');`
                 },
@@ -1123,7 +1130,8 @@
             'get-albums': {
                 title: 'GET /albums',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/albums" \\\n  -H "Accept: application/json"`,
+                    curl: `curl -X GET "{HOST}/albums" \\\
+  -H "Accept: application/json"`,
                     js: `fetch("{HOST}/albums", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
                     php: `$response = Http::get('{HOST}/albums');`
                 },
@@ -1136,7 +1144,8 @@
             'get-images': {
                 title: 'GET /images',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/images" \\\n  -H "Accept: application/json"`,
+                    curl: `curl -X GET "{HOST}/images" \\\
+  -H "Accept: application/json"`,
                     js: `fetch("{HOST}/images", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
                     php: `$response = Http::get('{HOST}/images');`
                 },
@@ -1149,7 +1158,11 @@
             'post-gallery': {
                 title: 'POST /gallery',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/gallery" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "title": "Fashion & Runway",\n    "description": "High fashion editorials and runway sessions."\n  }'`,
+                    curl: `curl -X POST "{HOST}/gallery" \\\
+  -H "Content-Type: application/json" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -d '{\n    "title": "Fashion & Runway",\n    "description": "High fashion editorials and runway sessions."\n  }'`,
                     js: `fetch("{HOST}/gallery", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    title: "Fashion & Runway",\n    description: "High fashion editorials and runway sessions."\n  })\n}).then(res => res.json());`,
                     php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/gallery', [\n    'title' => 'Fashion & Runway',\n    'description' => 'High fashion editorials and runway sessions.'\n]);`
                 },
@@ -1162,7 +1175,11 @@
             'post-albums': {
                 title: 'POST /albums',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/albums" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "gallery_id": 5,\n    "title": "Summer Collection 2026",\n    "description": "Outdoor beachside runway editorial."\n  }'`,
+                    curl: `curl -X POST "{HOST}/albums" \\\
+  -H "Content-Type: application/json" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -d '{\n    "gallery_id": 5,\n    "title": "Summer Collection 2026",\n    "description": "Outdoor beachside runway editorial."\n  }'`,
                     js: `fetch("{HOST}/albums", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    gallery_id: 5,\n    title: "Summer Collection 2026",\n    description: "Outdoor beachside runway editorial."\n  })\n}).then(res => res.json());`,
                     php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/albums', [\n    'gallery_id' => 5,\n    'title' => 'Summer Collection 2026',\n    'description' => 'Outdoor beachside runway editorial.'\n]);`
                 },
@@ -1175,7 +1192,11 @@
             'post-images-upload': {
                 title: 'POST /images/upload',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/images/upload" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -F "album_id=9" \\\n  -F "image=@/path/to/beach_model.png"`,
+                    curl: `curl -X POST "{HOST}/images/upload" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -F "album_id=9" \\\
+  -F "image=@/path/to/beach_model.png"`,
                     js: `const form = new FormData();\nform.append("album_id", "9");\nform.append("image", fileInput.files[0]);\n\nfetch("{HOST}/images/upload", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n}).then(res => res.json());`,
                     php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/images/upload', [\n    'album_id' => 9,\n    'image' => Http::attach(\n        'image', file_get_contents('/path/to/img.png'), 'img.png'\n    )\n]);`
                 },
@@ -1188,40 +1209,51 @@
             'post-images-archive': {
                 title: 'POST /images/archive',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/images/archive" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "image_id": 106\n  }'`,
-                    js: `fetch("{HOST}/images/archive", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({ image_id: 106 })\n}).then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/images/archive', [\n    'image_id' => 106\n]);`
+                    curl: `curl -X POST "{HOST}/images/archive" \\\
+  -H "Content-Type: application/json" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -d '{\n    "id": 106\n  }'`,
+                    js: `fetch("{HOST}/images/archive", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({ id: 106 })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept'        => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/images/archive', [\n    'id' => 106\n]);`
                 },
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Image archived successfully",\n  "image_id": 106,\n  "is_archived": true\n}`
+                    body: `{\n  "message": "Image archived successfully.",\n  "image": {\n    "id": 106,\n    "is_archived": true\n  }\n}`
                 }
             },
             'get-posts': {
                 title: 'GET /posts',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/posts" \\\n  -H "Accept: application/json"`,
-                    js: `fetch("{HOST}/posts", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
-                    php: `$response = Http::get('{HOST}/posts');`
+                    curl: `curl -X GET "{HOST}/posts" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/posts", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept'        => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/posts');`
                 },
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `[\n  {\n    "id": 34,\n    "photographer_id": 12,\n    "body": "Just uploaded my latest outdoor runway photoshoot. Check it out!",\n    "image_url": "https://res.cloudinary.com/...",\n    "likes_count": 28,\n    "comments_count": 3,\n    "created_at": "2026-05-18T10:00:00.000000Z"\n  }\n]`
+                    body: `[\n  {\n    "id": 34,\n    "user_id": 12,\n    "caption": "Golden hour at the pier — nothing beats natural light.",\n    "location": "Greenville",\n    "image_url": "https://res.cloudinary.com/lenslink/image/upload/v1/posts/post34.jpg",\n    "likes_count": 28,\n    "comments_count": 3,\n    "created_at": "2026-05-18T10:00:00.000000Z"\n  }\n]`
                 }
             },
             'post-posts': {
                 title: 'POST /posts',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/posts" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -F "body=Just wrapped up an incredible wedding shoot in Marina Bay!" \\\n  -F "image=@/path/to/showcase.jpg"`,
-                    js: `const form = new FormData();\nform.append("body", "Wrapping up in Marina Bay!");\nform.append("image", fileInput.files[0]);\n\nfetch("{HOST}/posts", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n});`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/posts', [\n    'body' => 'Wrapping up in Marina Bay!',\n    'image' => Http::attach('image', file_get_contents('/path/to/img.jpg'), 'img.jpg')\n]);`
+                    curl: `curl -X POST "{HOST}/posts" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -F "caption=Golden hour at the pier!" \\\
+  -F "location=Greenville" \\\
+  -F "image=@/path/to/showcase.jpg"`,
+                    js: `const form = new FormData();\nform.append("caption", "Golden hour at the pier!");\nform.append("location", "Greenville"); // optional\nform.append("image", fileInput.files[0]); // optional\n\nfetch("{HOST}/posts", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept'        => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/posts', [\n    'caption'  => 'Golden hour at the pier!',\n    'location' => 'Greenville',\n    'image'    => Http::attach('image', file_get_contents('/path/to/img.jpg'), 'img.jpg')\n]);`
                 },
                 responses: {
                     status: '201 Created',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Post created successfully",\n  "post": {\n    "id": 35,\n    "photographer_id": 12,\n    "body": "Wrapping up in Marina Bay!",\n    "image_url": "https://res.cloudinary.com/...",\n    "created_at": "2026-05-19T08:03:00.000000Z"\n  }\n}`
+                    body: `{\n  "message": "Post created successfully.",\n  "post": {\n    "id": 35,\n    "user_id": 12,\n    "caption": "Golden hour at the pier!",\n    "location": "Greenville",\n    "image_url": "https://res.cloudinary.com/lenslink/image/upload/v1/posts/post35.jpg",\n    "created_at": "2026-05-19T08:03:00.000000Z"\n  }\n}`
                 }
             },
             'delete-post': {
@@ -1253,14 +1285,18 @@
             'post-post-comment': {
                 title: 'POST /posts/{id}/comment',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/posts/34/comment" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "body": "Incredible lighting! What lenses did you use?"\n  }'`,
-                    js: `fetch("{HOST}/posts/34/comment", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    body: "Incredible lighting! What lenses did you use?"\n  })\n}).then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/posts/34/comment', [\n    'body' => 'Incredible lighting!'\n]);`
+                    curl: `curl -X POST "{HOST}/posts/34/comment" \\\
+  -H "Content-Type: application/json" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -d '{\n    "content": "Incredible lighting! What lenses did you use?"\n  }'`,
+                    js: `fetch("{HOST}/posts/34/comment", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    content: "Incredible lighting! What lenses did you use?"\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept'        => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/posts/34/comment', [\n    'content' => 'Incredible lighting! What lenses did you use?'\n]);`
                 },
                 responses: {
                     status: '201 Created',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Comment added successfully",\n  "comment": {\n    "id": 142,\n    "post_id": 34,\n    "user_id": 15,\n    "body": "Incredible lighting! What lenses did you use?",\n    "created_at": "2026-05-19T08:03:30.000000Z"\n  }\n}`
+                    body: `{\n  "message": "Comment added.",\n  "comment": {\n    "id": 142,\n    "post_id": 34,\n    "user_id": 15,\n    "content": "Incredible lighting! What lenses did you use?",\n    "created_at": "2026-05-19T08:03:30.000000Z"\n  }\n}`
                 }
             },
             'get-conversations': {
@@ -1279,9 +1315,11 @@
             'get-messages': {
                 title: 'GET /messages',
                 snippets: {
-                    curl: `curl -X GET "{HOST}/messages?user_id=12" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
-                    js: `fetch("{HOST}/messages?user_id=12", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/messages', [\n    'user_id' => 12\n]);`
+                    curl: `curl -X GET "{HOST}/messages?receiver_id=12" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/messages?receiver_id=12", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept'        => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/messages', [\n    'receiver_id' => 12\n]);`
                 },
                 responses: {
                     status: '200 OK',
@@ -1292,14 +1330,14 @@
             'post-messages': {
                 title: 'POST /messages',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/messages" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "receiver_id": 12,\n    "message": "Thursday at 2 PM works perfectly for me!"\n  }'`,
-                    js: `fetch("{HOST}/messages", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    receiver_id: 12,\n    message: "Thursday at 2 PM works perfectly!"\n  })\n}).then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/messages', [\n    'receiver_id' => 12,\n    'message' => 'Thursday at 2 PM works perfectly!'\n]);`
+                    curl: `curl -X POST "{HOST}/messages" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "receiver_id": 12,\n    "body": "Thursday at 2 PM works perfectly for me!"\n  }'`,
+                    js: `fetch("{HOST}/messages", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    receiver_id: 12,\n    body: "Thursday at 2 PM works perfectly!" // Note: field is 'body', not 'message'\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/messages', [\n    'receiver_id' => 12,\n    'body'        => 'Thursday at 2 PM works perfectly!' // Note: field is 'body'\n]);`
                 },
                 responses: {
                     status: '201 Created',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": {\n    "id": 403,\n    "sender_id": 15,\n    "receiver_id": 12,\n    "message": "Thursday at 2 PM works perfectly!",\n    "created_at": "2026-05-19T08:04:00.000000Z"\n  }\n}`
+                    body: `{\n  "message": {\n    "id": 5,\n    "sender_id": 3,\n    "receiver_id": 12,\n    "body": "Thursday at 2 PM works perfectly!",\n    "created_at": "2026-05-19T08:04:00.000000Z"\n  },\n  "event": "message.sent"\n}`
                 }
             },
             'post-booking-intent': {
@@ -1318,14 +1356,18 @@
             'post-booking-store': {
                 title: 'POST /bookings',
                 snippets: {
-                    curl: `curl -X POST "{HOST}/bookings" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "photographer_id": 12,\n    "booking_date": "2026-05-21 14:00:00",\n    "duration": 2,\n    "location": "Marina Bay Sands, Singapore",\n    "notes": "Outdoor fashion portrait shoot. 2 outfits."\n  }'`,
-                    js: `fetch("{HOST}/bookings", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    photographer_id: 12,\n    booking_date: "2026-05-21 14:00:00",\n    duration: 2,\n    location: "Marina Bay Sands, Singapore",\n    notes: "Outdoor fashion portrait shoot."\n  })\n}).then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/bookings', [\n    'photographer_id' => 12,\n    'booking_date' => '2026-05-21 14:00:00',\n    'duration' => 2,\n    'location' => 'Marina Bay Sands, Singapore',\n    'notes' => 'Outdoor fashion portrait shoot.'\n]);`
+                    curl: `curl -X POST "{HOST}/bookings" \\\
+  -H "Content-Type: application/json" \\\
+  -H "Accept: application/json" \\\
+  -H "Authorization: Bearer <TOKEN>" \\\
+  -d '{\n    "photographer_id": 2,\n    "session_date": "2026-06-01",\n    "amount": 150,\n    "notes": "Outdoor summer session"\n  }'`,
+                    js: `fetch("{HOST}/bookings", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    photographer_id: 2,\n    session_date: "2026-06-01",\n    amount: 150,\n    notes: "Outdoor summer session"\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept'        => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/bookings', [\n    'photographer_id' => 2,\n    'session_date'    => '2026-06-01',\n    'amount'          => 150,\n    'notes'           => 'Outdoor summer session'\n]);`
                 },
                 responses: {
                     status: '201 Created',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Booking request submitted successfully",\n  "booking": {\n    "id": 78,\n    "client_id": 15,\n    "photographer_id": 12,\n    "booking_date": "2026-05-21 14:00:00",\n    "duration": 2,\n    "location": "Marina Bay Sands, Singapore",\n    "notes": "Outdoor fashion portrait shoot. 2 outfits.",\n    "status": "pending",\n    "total_price": 350.00,\n    "created_at": "2026-05-19T08:04:20.000000Z"\n  }\n}`
+                    body: `{\n  "message": "Booking request submitted successfully.",\n  "booking": {\n    "id": 78,\n    "client_id": 15,\n    "photographer_id": 2,\n    "session_date": "2026-06-01",\n    "amount": 150,\n    "notes": "Outdoor summer session",\n    "status": "pending",\n    "created_at": "2026-05-19T08:04:20.000000Z"\n  }\n}`
                 }
             },
             'get-bookings': {
@@ -1357,14 +1399,14 @@
             'patch-booking-status': {
                 title: 'PATCH /bookings/{id}/status',
                 snippets: {
-                    curl: `curl -X PATCH "{HOST}/bookings/78/status" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "status": "approved"\n  }'`,
-                    js: `fetch("{HOST}/bookings/78/status", {\n  method: "PATCH",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({ status: "approved" })\n}).then(res => res.json());`,
-                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->patch('{HOST}/bookings/78/status', [\n    'status' => 'approved'\n]);`
+                    curl: `curl -X PATCH "{HOST}/bookings/78/status" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "status": "accepted"\n  }'\n# Allowed values: accepted | declined | completed | cancelled`,
+                    js: `// Allowed status values: accepted | declined | completed | cancelled\nfetch("{HOST}/bookings/78/status", {\n  method: "PATCH",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({ status: "accepted" })\n}).then(res => res.json());`,
+                    php: `// Allowed values: accepted | declined | completed | cancelled\n$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->patch('{HOST}/bookings/78/status', [\n    'status' => 'accepted'\n]);`
                 },
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Booking status updated successfully",\n  "booking": {\n    "id": 78,\n    "status": "approved"\n  }\n}`
+                    body: `{\n  "message": "Booking status updated.",\n  "booking": {\n    "id": 78,\n    "status": "accepted"\n  }\n}`
                 }
             },
             'post-booking-pay': {
@@ -1377,7 +1419,7 @@
                 responses: {
                     status: '200 OK',
                     success: true,
-                    body: `{\n  "status": "success",\n  "message": "Booking payment process initiated",\n  "booking_id": 78,\n  "status": "processing_payment"\n}`
+                    body: `{\n  "client_secret": "pi_3Mtwb2LkdIwHu7ix1aG2M_secret_YhT9p2qK...",\n  "amount": 150,\n  "currency": "usd"\n}`
                 }
             },
             'post-booking-confirm': {
