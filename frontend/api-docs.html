@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LensLink API Documentation</title>
+    <meta name="description" content="Explore and test the LensLink backend API. Complete developer documentation including endpoints, payloads, response samples, and code snippets.">
+    <link rel="stylesheet" href="assets/css/api-docs.css">
+</head>
+<body>
+
+    <!-- Top Header -->
+    <header class="top-header">
+        <div class="logo-container">
+            <div class="logo-logo">L</div>
+            <span class="logo-text">LensLink API Docs</span>
+        </div>
+        <div class="header-controls">
+            <div class="search-wrapper">
+                <input type="text" id="search-input" class="search-input" placeholder="Search endpoints (e.g. login, Stripe)..." oninput="filterEndpoints()">
+            </div>
+            <div class="env-switcher">
+                <button id="env-local" class="env-btn" onclick="setEnvironment('local')">Local Dev</button>
+                <button id="env-prod" class="env-btn active" onclick="setEnvironment('prod')">Production</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="app-container">
+        <!-- Sidebar Column -->
+        <aside class="sidebar">
+            <!-- Overview -->
+            <div class="sidebar-category">
+                <div class="category-title">Getting Started</div>
+                <ul class="sidebar-links">
+                    <li><a href="#welcome" class="sidebar-link active" onclick="setActiveLink(this)">👋 Welcome & Intro</a></li>
+                    <li><a href="#authentication" class="sidebar-link" onclick="setActiveLink(this)">🔑 Authentication Shield</a></li>
+                </ul>
+            </div>
+
+            <!-- Authentication Category -->
+            <div class="sidebar-category" id="cat-auth">
+                <div class="category-title">Authentication & Profile</div>
+                <ul class="sidebar-links">
+                    <li><a href="#post-register" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/register</a></li>
+                    <li><a href="#post-login" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/login</a></li>
+                    <li><a href="#post-firebase" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/auth/firebase</a></li>
+                    <li><a href="#get-profile" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/profile</a></li>
+                    <li><a href="#post-profile-update" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/profile/update</a></li>
+                    <li><a href="#post-logout" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/logout</a></li>
+                </ul>
+            </div>
+
+            <!-- Photographers Category -->
+            <div class="sidebar-category" id="cat-photographers">
+                <div class="category-title">Photographers & Location</div>
+                <ul class="sidebar-links">
+                    <li><a href="#get-photographers" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/photographers</a></li>
+                    <li><a href="#get-photographer-detail" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/photographers/{id}</a></li>
+                    <li><a href="#get-search-location" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/search/location</a></li>
+                </ul>
+            </div>
+
+            <!-- Galleries & Albums Category -->
+            <div class="sidebar-category" id="cat-galleries">
+                <div class="category-title">Galleries & Media</div>
+                <ul class="sidebar-links">
+                    <li><a href="#get-gallery" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/gallery</a></li>
+                    <li><a href="#get-albums" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/albums</a></li>
+                    <li><a href="#get-images" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/images</a></li>
+                    <li><a href="#post-gallery" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/gallery</a></li>
+                    <li><a href="#post-albums" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/albums</a></li>
+                    <li><a href="#post-images-upload" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/images/upload</a></li>
+                    <li><a href="#post-images-archive" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/images/archive</a></li>
+                </ul>
+            </div>
+
+            <!-- Social Feed Category -->
+            <div class="sidebar-category" id="cat-posts">
+                <div class="category-title">Social Feed & Interaction</div>
+                <ul class="sidebar-links">
+                    <li><a href="#get-posts" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/posts</a></li>
+                    <li><a href="#post-posts" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/posts</a></li>
+                    <li><a href="#delete-post" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag delete">DEL</span>/posts/{id}</a></li>
+                    <li><a href="#post-post-like" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/posts/{id}/like</a></li>
+                    <li><a href="#post-post-comment" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/posts/{id}/comment</a></li>
+                </ul>
+            </div>
+
+            <!-- Messaging Category -->
+            <div class="sidebar-category" id="cat-messages">
+                <div class="category-title">Direct Messaging</div>
+                <ul class="sidebar-links">
+                    <li><a href="#get-conversations" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/conversations</a></li>
+                    <li><a href="#get-messages" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/messages</a></li>
+                    <li><a href="#post-messages" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/messages</a></li>
+                </ul>
+            </div>
+
+            <!-- Bookings & Payments Category -->
+            <div class="sidebar-category" id="cat-bookings">
+                <div class="category-title">Bookings & Stripe Payments</div>
+                <ul class="sidebar-links">
+                    <li><a href="#post-booking-intent" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/bookings/intent</a></li>
+                    <li><a href="#post-booking-store" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/bookings</a></li>
+                    <li><a href="#get-bookings" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/bookings</a></li>
+                    <li><a href="#get-booking-detail" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag get">GET</span>/bookings/{id}</a></li>
+                    <li><a href="#patch-booking-status" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag patch">PATCH</span>/bookings/{id}/status</a></li>
+                    <li><a href="#post-booking-pay" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/bookings/{id}/pay</a></li>
+                    <li><a href="#post-booking-confirm" class="sidebar-link" onclick="setActiveLink(this)"><span class="method-tag post">POST</span>/bookings/{id}/confirm</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Documentation Details Column -->
+            <div class="doc-section-container" id="doc-container">
+
+                <!-- Welcome Section -->
+                <section id="welcome" class="endpoint-section">
+                    <div class="getting-started-card">
+                        <h1>LensLink API Reference v1</h1>
+                        <p>Welcome to the LensLink API reference portal! LensLink is a premium, visual marketplace and social ecosystem designed to connect professional photographers with prospective clients seamlessly. Our backend is powered by Laravel 11 running on PHP, featuring secure JWT/Session integration via Laravel Sanctum, real-time chats with Pusher, Stripe payments, and secure high-performance image uploads to Cloudinary.</p>
+                        <p>Use the toggles in the header to switch between <strong>Local Dev</strong> and <strong>Production</strong>. You can filter the left sidebar using the real-time search bar.</p>
+                    </div>
+                </section>
+
+                <!-- Authentication Shield Section -->
+                <section id="authentication" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="endpoint-path">Security & Authentication Shield</span>
+                    </div>
+                    <p class="endpoint-desc">Most interactive and transactional endpoints require authentication. LensLink utilizes <strong>Laravel Sanctum</strong> to issue secure API bearer tokens. Once a user logs in successfully, you must include the token in the headers of all subsequent requests.</p>
+                    <div class="auth-badge">
+                        <span>Authorization: Bearer &lt;YOUR_API_TOKEN&gt;</span>
+                    </div>
+                </section>
+
+                <!-- POST /register -->
+                <section id="post-register" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/register</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Creates a new user account in LensLink. Users can register either as a <strong>client</strong> (to book sessions) or a <strong>photographer</strong> (to publish galleries and receive bookings).</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">name</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The full name of the user. Min length: 3.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">email</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">A valid, unique email address.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">password</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Min length: 8 characters. Must match confirmation.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">password_confirmation</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Repeated password for validation.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">role</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Must be either <code>"client"</code> or <code>"photographer"</code>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /login -->
+                <section id="post-login" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/login</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Authenticates the user using email and password, returning an active API Token and essential user profile objects.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">email</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The user's registered email address.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">password</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The user's password.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /auth/firebase -->
+                <section id="post-firebase" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/auth/firebase</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Exchanges a Firebase Identity Provider JWT (returned from social logins like Google Sign-In) for a secure, permanent LensLink Sanctum API Token.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">token</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The raw Google/Firebase ID JWT token.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GET /profile -->
+                <section id="get-profile" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/profile</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Retrieves the fully populated profile structure of the currently authenticated user, including role details and settings.</p>
+                </section>
+
+                <!-- POST /profile/update -->
+                <section id="post-profile-update" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/profile/update</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Updates profile parameters. If the authenticated user is a photographer, this route allows configuring pricing, specialties, and business parameters.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters (Multipart Form-Data supported)</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">name</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Update the display name.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">bio</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">A brief biography.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">specialty</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">E.g., "Wedding", "Portrait", "Landscape".</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">location</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Primary operating city.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">rate</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">numeric</span></td>
+                                    <td class="param-desc">Hourly booking fee in USD.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">profile_picture</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">file</span></td>
+                                    <td class="param-desc">Image file (jpeg, png, webp) up to 2MB. Uploaded directly to Cloudinary.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /logout -->
+                <section id="post-logout" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/logout</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Revokes the active Sanctum Token and invalidates the user session instantly.</p>
+                </section>
+
+                <!-- GET /photographers -->
+                <section id="get-photographers" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/photographers</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Retrieves a filtered, searchable listing of professional photographers registered on the platform.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Query Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">search</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Fuzzy match against name, specialty, or bio.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">location</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Fuzzy operating location string.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GET /photographers/{id} -->
+                <section id="get-photographer-detail" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/photographers/{id}</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Retrieves standard detailed public metadata about a photographer, including pricing, specialties, location coords, reviews, and linked public albums.</p>
+                </section>
+
+                <!-- GET /search/location -->
+                <section id="get-search-location" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/search/location</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Proxies and interfaces with Google Maps API to search operating coordinates and location details by dynamic string search query.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Query Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">query</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Address or city name search query.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GET /gallery -->
+                <section id="get-gallery" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/gallery</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Retrieves a combined feed of active, public media galleries created by photographers.</p>
+                </section>
+
+                <!-- GET /albums -->
+                <section id="get-albums" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/albums</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Lists public albums across all galleries. Useful for general exploration screens.</p>
+                </section>
+
+                <!-- GET /images -->
+                <section id="get-images" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/images</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Fetches a direct listing of public imagery, fully resolved with Cloudinary links.</p>
+                </section>
+
+                <!-- POST /gallery -->
+                <section id="post-gallery" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/gallery</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Creates a parent gallery entity to categorize multiple sub-albums.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">title</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">E.g., "Corporate & Branding". Max: 255.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">description</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Contextual summary of the gallery.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /albums -->
+                <section id="post-albums" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/albums</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Creates an Album container tied to a specific Gallery.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">gallery_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">ID of the parent gallery.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">title</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The sub-album title.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">description</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Details of the photoshoot album.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /images/upload -->
+                <section id="post-images-upload" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/images/upload</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Directly uploads an image binary payload. Handles optimization and uploads directly to <strong>Cloudinary CDN</strong>, returning a permanent optimized asset URL.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters (Multipart)</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">album_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">The album target to append the image to.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">image</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">file</span></td>
+                                    <td class="param-desc">Image asset binary file up to 5MB size limit.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /images/archive -->
+                <section id="post-images-archive" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/images/archive</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Marks a active image as archived (soft hidden from public screens) without deleting database relations permanently.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">image_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">The database ID of the image to archive.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GET /posts -->
+                <section id="get-posts" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/posts</span>
+                        <span class="endpoint-auth-indicator public">Public Route</span>
+                    </div>
+                    <p class="endpoint-desc">Fetches the social interaction feed, displaying structured posts created by photographers with likes, comments counts, and media URLs.</p>
+                </section>
+
+                <!-- POST /posts -->
+                <section id="post-posts" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/posts</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Creates a new feed post in LensLink. Includes support for uploading custom cover photos.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">body</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Main text body of the social post.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">image</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">file</span></td>
+                                    <td class="param-desc">Optional post background/showcase photo up to 2MB.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- DELETE /posts/{id} -->
+                <section id="delete-post" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag delete">DELETE</span>
+                        <span class="endpoint-path">/posts/{id}</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Deletes the requested post permanently. The user must be the original author of the post.</p>
+                </section>
+
+                <!-- POST /posts/{id}/like -->
+                <section id="post-post-like" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/posts/{id}/like</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Toggles a like status on the target post for the currently authenticated user.</p>
+                </section>
+
+                <!-- POST /posts/{id}/comment -->
+                <section id="post-post-comment" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/posts/{id}/comment</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Adds a textual commentary reply to a active social feed post.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">body</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The reply statement content text.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GET /conversations -->
+                <section id="get-conversations" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/conversations</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Lists all unique chat dialogue channels active for the authenticated user, resolving the counterparty's profiles and latest messages.</p>
+                </section>
+
+                <!-- GET /messages -->
+                <section id="get-messages" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/messages</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Fetches the detailed chronological chat history of a active dialog with another counterparty.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Query Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">user_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">The database ID of the chat counterparty.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /messages -->
+                <section id="post-messages" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/messages</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Dispatches a direct chat message to another user. Dispatches real-time client side refresh signals through integrated <strong>Pusher channels</strong> automatically.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">receiver_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">Recipient user ID.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">message</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The text body of the chat.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /bookings/intent -->
+                <section id="post-booking-intent" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/bookings/intent</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Generates a Stripe Payment Intent clientSecret payload based on booking parameters to process dynamic credit card checkouts on the frontend.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">photographer_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">The targeted photographer user ID.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">amount</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">numeric</span></td>
+                                    <td class="param-desc">Amount in cents (e.g. 5000 for $50.00).</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /bookings -->
+                <section id="post-booking-store" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/bookings</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Creates a active pending photographer reservation record on LensLink.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">photographer_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">Photographer ID.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">booking_date</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Date/time in ISO-8601 or YYYY-MM-DD standard format.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">duration</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">integer</span></td>
+                                    <td class="param-desc">Duration of the photoshoot in hours.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">location</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The address for the photoshoot.</td>
+                                </tr>
+                                <tr>
+                                    <td><span class="param-name">notes</span><span class="param-optional">optional</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Extra instructions or requirements.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- GET /bookings -->
+                <section id="get-bookings" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/bookings</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Retrieves a customized list of active booking sheets. Clients see their outbound booking requests; Photographers see inbound inquiries.</p>
+                </section>
+
+                <!-- GET /bookings/{id} -->
+                <section id="get-booking-detail" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag get">GET</span>
+                        <span class="endpoint-path">/bookings/{id}</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Retrieves complete structural detail of a single reservation record (pricing calculation, address coordinate indicators, notes, statuses).</p>
+                </section>
+
+                <!-- PATCH /bookings/{id}/status -->
+                <section id="patch-booking-status" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag patch">PATCH</span>
+                        <span class="endpoint-path">/bookings/{id}/status</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Allows a photographer to accept or reject an incoming reservation request.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">status</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">Must be either <code>"approved"</code> or <code>"rejected"</code>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- POST /bookings/{id}/pay -->
+                <section id="post-booking-pay" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/bookings/{id}/pay</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Pre-initiates booking invoice payment parameters for client approval.</p>
+                </section>
+
+                <!-- POST /bookings/{id}/confirm -->
+                <section id="post-booking-confirm" class="endpoint-section">
+                    <div class="endpoint-header">
+                        <span class="method-tag post">POST</span>
+                        <span class="endpoint-path">/bookings/{id}/confirm</span>
+                        <span class="endpoint-auth-indicator">Bearer Token Required</span>
+                    </div>
+                    <p class="endpoint-desc">Validates and registers Stripe success transaction signals to transition the booking status to <code>"paid"</code>.</p>
+                    
+                    <div class="params-container">
+                        <div class="params-header">Request Body Parameters</div>
+                        <table class="params-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="param-name">payment_intent_id</span><span class="param-required">required</span></td>
+                                    <td><span class="param-type">string</span></td>
+                                    <td class="param-desc">The validated Stripe Payment Intent token starting with <code>pi_...</code>.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- Empty State (No search results found) -->
+                <div id="search-empty-state" class="empty-state">
+                    <div class="empty-state-icon">🔍</div>
+                    <div class="empty-state-text">No matching endpoints found</div>
+                    <div class="empty-state-sub">Try searching for other verbs, parameters, or pathways.</div>
+                </div>
+
+            </div>
+
+            <!-- Code Playground Panel (Right Column) -->
+            <div class="code-panel">
+                <div class="code-header">
+                    <div class="code-tabs">
+                        <button id="tab-curl" class="code-tab active" onclick="switchLanguage('curl')">cURL</button>
+                        <button id="tab-js" class="code-tab" onclick="switchLanguage('js')">JS Fetch</button>
+                        <button id="tab-php" class="code-tab" onclick="switchLanguage('php')">PHP Guzzle</button>
+                    </div>
+                    <button class="copy-btn" onclick="copySnippet()" title="Copy snippet to clipboard">📋 Copy</button>
+                </div>
+
+                <div class="code-scrollable" id="code-playground-content">
+                    <!-- Dynamic code snippets populated by JS -->
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Data Definitions for Interactive Playground -->
+    <script>
+        // Host Configuration
+        let currentEnv = 'prod';
+        const hosts = {
+            local: 'http://localhost:8000/api',
+            prod: 'https://lenslink-api.onrender.com/api'
+        };
+
+        // Active Language Code Switcher State
+        let currentLang = 'curl';
+
+        // Complete endpoint specification map
+        const specs = {
+            'welcome': {
+                title: 'LensLink API Reference',
+                requestHeaders: null,
+                bodyParams: null,
+                snippets: {
+                    curl: `# Welcome to LensLink API Docs!\n# Use the sidebar links to explore individual endpoints.\n# Active environment host: \n# ${hosts[currentEnv]}`,
+                    js: `// Explore LensLink API Ref\nconsole.log("Ready to build great things with LensLink!");`,
+                    php: `// Laravel backend core integration.\ninfo("LensLink API loaded successfully");`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{ "message": "Welcome to LensLink API v1" }`
+                }
+            },
+            'authentication': {
+                title: 'Authentication Shield',
+                requestHeaders: null,
+                bodyParams: null,
+                snippets: {
+                    curl: `# Authentication is handled via Laravel Sanctum Tokens.\n# Provide your token in the Authorization header:\n# Authorization: Bearer <TOKEN>`,
+                    js: `// Include headers in your JS requests:\nconst headers = {\n  "Accept": "application/json",\n  "Authorization": "Bearer <TOKEN>"\n};`,
+                    php: `// Laravel Guzzle client context\n$response = $client->get('/api/profile', [\n    'headers' => [\n        'Accept' => 'application/json',\n        'Authorization' => 'Bearer ' . $token\n    ]\n]);`
+                },
+                responses: {
+                    status: '401 Unauthorized',
+                    success: false,
+                    body: `{\n  "message": "Unauthenticated."\n}`
+                }
+            },
+            'post-register': {
+                title: 'POST /register',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/register" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '{\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "password": "securepassword123",\n    "password_confirmation": "securepassword123",\n    "role": "photographer"\n  }'`,
+                    js: `fetch("{HOST}/register", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json"\n  },\n  body: JSON.stringify({\n    name: "Jane Doe",\n    email: "jane@example.com",\n    password: "securepassword123",\n    password_confirmation: "securepassword123",\n    role: "photographer"\n  })\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->post('{HOST}/register', [\n    'name' => 'Jane Doe',\n    'email' => 'jane@example.com',\n    'password' => 'securepassword123',\n    'password_confirmation' => 'securepassword123',\n    'role' => 'photographer'\n]);\n\n$data = $response->json();`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "User registered successfully",\n  "token": "1|u7YhT9p2qK1lS92...",\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "role": "photographer",\n    "created_at": "2026-05-19T08:00:00.000000Z"\n  }\n}`
+                }
+            },
+            'post-login': {
+                title: 'POST /login',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/login" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '{\n    "email": "jane@example.com",\n    "password": "securepassword123"\n  }'`,
+                    js: `fetch("{HOST}/login", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json"\n  },\n  body: JSON.stringify({\n    email: "jane@example.com",\n    password: "securepassword123"\n  })\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->post('{HOST}/login', [\n    'email' => 'jane@example.com',\n    'password' => 'securepassword123'\n]);\n\n$data = $response->json();`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "token": "2|j9HhK8o9fG1qY77...",\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "role": "photographer"\n  }\n}`
+                }
+            },
+            'post-firebase': {
+                title: 'POST /auth/firebase',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/auth/firebase" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -d '{\n    "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6..."\n  }'`,
+                    js: `fetch("{HOST}/auth/firebase", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json"\n  },\n  body: JSON.stringify({\n    token: "eyJhbGciOiJSUzI1NiIsImtpZCI6..."\n  })\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json'\n])->post('{HOST}/auth/firebase', [\n    'token' => 'eyJhbGciOiJSUzI1NiIsImtpZCI6...'\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "token": "3|L90pKq12fO97jU1...",\n  "user": {\n    "id": 15,\n    "name": "Alex Smith",\n    "email": "alex@gmail.com",\n    "role": "client"\n  }\n}`
+                }
+            },
+            'get-profile': {
+                title: 'GET /profile',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/profile" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/profile", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n})\n.then(res => res.json())\n.then(data => console.log(data));`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/profile');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "email": "jane@example.com",\n    "role": "photographer",\n    "bio": "Capturing architectural wonders.",\n    "location": "Singapore",\n    "rate": 150.00,\n    "profile_picture": "https://res.cloudinary.com/lenslink/image/upload/v1/profiles/jane.jpg"\n  }\n}`
+                }
+            },
+            'post-profile-update': {
+                title: 'POST /profile/update',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/profile/update" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -F "bio=Award winning wedding and portrait photographer." \\\n  -F "rate=175" \\\n  -F "profile_picture=@/path/to/my_face.png"`,
+                    js: `const form = new FormData();\nform.append("bio", "Award winning wedding photographer.");\nform.append("rate", "175");\nform.append("profile_picture", fileInput.files[0]);\n\nfetch("{HOST}/profile/update", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n})\n.then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/profile/update', [\n    'bio' => 'Award winning portrait artist.',\n    'rate' => 175,\n    'profile_picture' => Http::attach(\n        'profile_picture', file_get_contents('/path/to/img.png'), 'img.png'\n    )\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Profile updated successfully",\n  "user": {\n    "id": 12,\n    "name": "Jane Doe",\n    "bio": "Award winning wedding and portrait photographer.",\n    "rate": 175.00,\n    "profile_picture": "https://res.cloudinary.com/lenslink/image/upload/v2/profiles/jane_updated.jpg"\n  }\n}`
+                }
+            },
+            'post-logout': {
+                title: 'POST /logout',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/logout" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/logout", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n})\n.then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/logout');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Logged out successfully"\n}`
+                }
+            },
+            'get-photographers': {
+                title: 'GET /photographers',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/photographers?search=wedding&location=Singapore" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/photographers?search=wedding&location=Singapore", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json"\n  }\n})\n.then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/photographers', [\n    'search' => 'wedding',\n    'location' => 'Singapore'\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 12,\n    "name": "Jane Doe",\n    "specialty": "Wedding & Events",\n    "location": "Singapore",\n    "rate": 175.00,\n    "profile_picture": "https://res.cloudinary.com/..."\n  },\n  {\n    "id": 18,\n    "name": "Marcus Goh",\n    "specialty": "Fine Art Wedding",\n    "location": "Singapore",\n    "rate": 220.00,\n    "profile_picture": "https://res.cloudinary.com/..."\n  }\n]`
+                }
+            },
+            'get-photographer-detail': {
+                title: 'GET /photographers/{id}',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/photographers/12" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/photographers/12", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json"\n  }\n})\n.then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/photographers/12');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "id": 12,\n  "name": "Jane Doe",\n  "email": "jane@example.com",\n  "bio": "Award winning wedding photographer.",\n  "specialty": "Wedding",\n  "location": "Singapore",\n  "rate": 175.00,\n  "profile_picture": "https://res.cloudinary.com/...",\n  "galleries": [\n    {\n      "id": 4,\n      "title": "Corporate and Commercial",\n      "albums_count": 2\n    }\n  ],\n  "reviews": [\n    {\n      "author": "Alice Lim",\n      "rating": 5,\n      "comment": "Incredible work and highly responsive!"\n    }\n  ]\n}`
+                }
+            },
+            'get-search-location': {
+                title: 'GET /search/location',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/search/location?query=Marina+Bay+Sands" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/search/location?query=Marina+Bay+Sands", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json"\n  }\n})\n.then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/search/location', [\n    'query' => 'Marina Bay Sands'\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "OK",\n  "results": [\n    {\n      "formatted_address": "Marina Bay Sands, 10 Bayfront Ave, Singapore 018956",\n      "geometry": {\n        "location": {\n          "lat": 1.2828,\n          "lng": 103.8609\n        }\n      },\n      "place_id": "ChIJc1XhEpsZ2jER_N165t4vR9U"\n    }\n  ]\n}`
+                }
+            },
+            'get-gallery': {
+                title: 'GET /gallery',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/gallery" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/gallery", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/gallery');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 4,\n    "photographer_id": 12,\n    "title": "Corporate Portfolio",\n    "description": "Professional headshots and corporate branding sheets.",\n    "created_at": "2026-05-15T00:00:00.000000Z"\n  }\n]`
+                }
+            },
+            'get-albums': {
+                title: 'GET /albums',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/albums" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/albums", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/albums');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 8,\n    "gallery_id": 4,\n    "title": "Financial District Headshots",\n    "description": "Photographed in Singapore financial center.",\n    "images_count": 12\n  }\n]`
+                }
+            },
+            'get-images': {
+                title: 'GET /images',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/images" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/images", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/images');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 105,\n    "album_id": 8,\n    "url": "https://res.cloudinary.com/lenslink/image/upload/v12/albums/headshot_1.jpg",\n    "is_archived": false\n  }\n]`
+                }
+            },
+            'post-gallery': {
+                title: 'POST /gallery',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/gallery" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "title": "Fashion & Runway",\n    "description": "High fashion editorials and runway sessions."\n  }'`,
+                    js: `fetch("{HOST}/gallery", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    title: "Fashion & Runway",\n    description: "High fashion editorials and runway sessions."\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/gallery', [\n    'title' => 'Fashion & Runway',\n    'description' => 'High fashion editorials and runway sessions.'\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Gallery created successfully",\n  "gallery": {\n    "id": 5,\n    "photographer_id": 12,\n    "title": "Fashion & Runway",\n    "description": "High fashion editorials and runway sessions.",\n    "created_at": "2026-05-19T08:02:00.000000Z"\n  }\n}`
+                }
+            },
+            'post-albums': {
+                title: 'POST /albums',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/albums" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "gallery_id": 5,\n    "title": "Summer Collection 2026",\n    "description": "Outdoor beachside runway editorial."\n  }'`,
+                    js: `fetch("{HOST}/albums", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    gallery_id: 5,\n    title: "Summer Collection 2026",\n    description: "Outdoor beachside runway editorial."\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/albums', [\n    'gallery_id' => 5,\n    'title' => 'Summer Collection 2026',\n    'description' => 'Outdoor beachside runway editorial.'\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Album created successfully",\n  "album": {\n    "id": 9,\n    "gallery_id": 5,\n    "title": "Summer Collection 2026",\n    "description": "Outdoor beachside runway editorial.",\n    "created_at": "2026-05-19T08:02:15.000000Z"\n  }\n}`
+                }
+            },
+            'post-images-upload': {
+                title: 'POST /images/upload',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/images/upload" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -F "album_id=9" \\\n  -F "image=@/path/to/beach_model.png"`,
+                    js: `const form = new FormData();\nform.append("album_id", "9");\nform.append("image", fileInput.files[0]);\n\nfetch("{HOST}/images/upload", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/images/upload', [\n    'album_id' => 9,\n    'image' => Http::attach(\n        'image', file_get_contents('/path/to/img.png'), 'img.png'\n    )\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Image uploaded successfully to Cloudinary",\n  "image": {\n    "id": 106,\n    "album_id": 9,\n    "url": "https://res.cloudinary.com/lenslink/image/upload/v19/albums/beach_model.jpg",\n    "is_archived": false\n  }\n}`
+                }
+            },
+            'post-images-archive': {
+                title: 'POST /images/archive',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/images/archive" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "image_id": 106\n  }'`,
+                    js: `fetch("{HOST}/images/archive", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({ image_id: 106 })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/images/archive', [\n    'image_id' => 106\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Image archived successfully",\n  "image_id": 106,\n  "is_archived": true\n}`
+                }
+            },
+            'get-posts': {
+                title: 'GET /posts',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/posts" \\\n  -H "Accept: application/json"`,
+                    js: `fetch("{HOST}/posts", {\n  method: "GET",\n  headers: { "Accept": "application/json" }\n}).then(res => res.json());`,
+                    php: `$response = Http::get('{HOST}/posts');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 34,\n    "photographer_id": 12,\n    "body": "Just uploaded my latest outdoor runway photoshoot. Check it out!",\n    "image_url": "https://res.cloudinary.com/...",\n    "likes_count": 28,\n    "comments_count": 3,\n    "created_at": "2026-05-18T10:00:00.000000Z"\n  }\n]`
+                }
+            },
+            'post-posts': {
+                title: 'POST /posts',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/posts" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -F "body=Just wrapped up an incredible wedding shoot in Marina Bay!" \\\n  -F "image=@/path/to/showcase.jpg"`,
+                    js: `const form = new FormData();\nform.append("body", "Wrapping up in Marina Bay!");\nform.append("image", fileInput.files[0]);\n\nfetch("{HOST}/posts", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: form\n});`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->asMultipart()->post('{HOST}/posts', [\n    'body' => 'Wrapping up in Marina Bay!',\n    'image' => Http::attach('image', file_get_contents('/path/to/img.jpg'), 'img.jpg')\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Post created successfully",\n  "post": {\n    "id": 35,\n    "photographer_id": 12,\n    "body": "Wrapping up in Marina Bay!",\n    "image_url": "https://res.cloudinary.com/...",\n    "created_at": "2026-05-19T08:03:00.000000Z"\n  }\n}`
+                }
+            },
+            'delete-post': {
+                title: 'DELETE /posts/{id}',
+                snippets: {
+                    curl: `curl -X DELETE "{HOST}/posts/35" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/posts/35", {\n  method: "DELETE",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->delete('{HOST}/posts/35');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Post deleted successfully"\n}`
+                }
+            },
+            'post-post-like': {
+                title: 'POST /posts/{id}/like',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/posts/34/like" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/posts/34/like", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/posts/34/like');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "liked": true,\n  "likes_count": 29\n}`
+                }
+            },
+            'post-post-comment': {
+                title: 'POST /posts/{id}/comment',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/posts/34/comment" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "body": "Incredible lighting! What lenses did you use?"\n  }'`,
+                    js: `fetch("{HOST}/posts/34/comment", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    body: "Incredible lighting! What lenses did you use?"\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/posts/34/comment', [\n    'body' => 'Incredible lighting!'\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Comment added successfully",\n  "comment": {\n    "id": 142,\n    "post_id": 34,\n    "user_id": 15,\n    "body": "Incredible lighting! What lenses did you use?",\n    "created_at": "2026-05-19T08:03:30.000000Z"\n  }\n}`
+                }
+            },
+            'get-conversations': {
+                title: 'GET /conversations',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/conversations" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/conversations", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/conversations');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 4,\n    "counterparty": {\n      "id": 12,\n      "name": "Jane Doe",\n      "profile_picture": "https://res.cloudinary.com/..."\n    },\n    "latest_message": {\n      "message": "Hi, I am interested in booking a headshot session.",\n      "created_at": "2026-05-19T06:30:00.000000Z"\n    }\n  }\n]`
+                }
+            },
+            'get-messages': {
+                title: 'GET /messages',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/messages?user_id=12" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/messages?user_id=12", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/messages', [\n    'user_id' => 12\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 401,\n    "sender_id": 15,\n    "receiver_id": 12,\n    "message": "Hi, I am interested in booking a headshot session.",\n    "created_at": "2026-05-19T06:30:00.000000Z"\n  },\n  {\n    "id": 402,\n    "sender_id": 12,\n    "receiver_id": 15,\n    "message": "Hi Alice! I have availability this Thursday. Does that work?",\n    "created_at": "2026-05-19T06:35:00.000000Z"\n  }\n]`
+                }
+            },
+            'post-messages': {
+                title: 'POST /messages',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/messages" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "receiver_id": 12,\n    "message": "Thursday at 2 PM works perfectly for me!"\n  }'`,
+                    js: `fetch("{HOST}/messages", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    receiver_id: 12,\n    message: "Thursday at 2 PM works perfectly!"\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/messages', [\n    'receiver_id' => 12,\n    'message' => 'Thursday at 2 PM works perfectly!'\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": {\n    "id": 403,\n    "sender_id": 15,\n    "receiver_id": 12,\n    "message": "Thursday at 2 PM works perfectly!",\n    "created_at": "2026-05-19T08:04:00.000000Z"\n  }\n}`
+                }
+            },
+            'post-booking-intent': {
+                title: 'POST /bookings/intent',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/bookings/intent" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "photographer_id": 12,\n    "amount": 35000\n  }'`,
+                    js: `fetch("{HOST}/bookings/intent", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    photographer_id: 12,\n    amount: 35000\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/bookings/intent', [\n    'photographer_id' => 12,\n    'amount' => 35000\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "clientSecret": "pi_3Mtwb2LkdIwHu7ix1aG2M_secret_YhT9p2qK1lS92...",\n  "amount": 35000,\n  "currency": "usd"\n}`
+                }
+            },
+            'post-booking-store': {
+                title: 'POST /bookings',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/bookings" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "photographer_id": 12,\n    "booking_date": "2026-05-21 14:00:00",\n    "duration": 2,\n    "location": "Marina Bay Sands, Singapore",\n    "notes": "Outdoor fashion portrait shoot. 2 outfits."\n  }'`,
+                    js: `fetch("{HOST}/bookings", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    photographer_id: 12,\n    booking_date: "2026-05-21 14:00:00",\n    duration: 2,\n    location: "Marina Bay Sands, Singapore",\n    notes: "Outdoor fashion portrait shoot."\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/bookings', [\n    'photographer_id' => 12,\n    'booking_date' => '2026-05-21 14:00:00',\n    'duration' => 2,\n    'location' => 'Marina Bay Sands, Singapore',\n    'notes' => 'Outdoor fashion portrait shoot.'\n]);`
+                },
+                responses: {
+                    status: '201 Created',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Booking request submitted successfully",\n  "booking": {\n    "id": 78,\n    "client_id": 15,\n    "photographer_id": 12,\n    "booking_date": "2026-05-21 14:00:00",\n    "duration": 2,\n    "location": "Marina Bay Sands, Singapore",\n    "notes": "Outdoor fashion portrait shoot. 2 outfits.",\n    "status": "pending",\n    "total_price": 350.00,\n    "created_at": "2026-05-19T08:04:20.000000Z"\n  }\n}`
+                }
+            },
+            'get-bookings': {
+                title: 'GET /bookings',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/bookings" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/bookings", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/bookings');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `[\n  {\n    "id": 78,\n    "photographer_name": "Jane Doe",\n    "booking_date": "2026-05-21 14:00:00",\n    "duration": 2,\n    "location": "Marina Bay Sands, Singapore",\n    "total_price": 350.00,\n    "status": "pending"\n  }\n]`
+                }
+            },
+            'get-booking-detail': {
+                title: 'GET /bookings/{id}',
+                snippets: {
+                    curl: `curl -X GET "{HOST}/bookings/78" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/bookings/78", {\n  method: "GET",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->get('{HOST}/bookings/78');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "id": 78,\n  "client_id": 15,\n  "photographer_id": 12,\n  "booking_date": "2026-05-21 14:00:00",\n  "duration": 2,\n  "location": "Marina Bay Sands, Singapore",\n  "notes": "Outdoor fashion portrait shoot. 2 outfits.",\n  "status": "pending",\n  "total_price": 350.00,\n  "client": {\n    "id": 15,\n    "name": "Alice Lim"\n  },\n  "photographer": {\n    "id": 12,\n    "name": "Jane Doe",\n    "rate": 175.00\n  }\n}`
+                }
+            },
+            'patch-booking-status': {
+                title: 'PATCH /bookings/{id}/status',
+                snippets: {
+                    curl: `curl -X PATCH "{HOST}/bookings/78/status" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "status": "approved"\n  }'`,
+                    js: `fetch("{HOST}/bookings/78/status", {\n  method: "PATCH",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({ status: "approved" })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->patch('{HOST}/bookings/78/status', [\n    'status' => 'approved'\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Booking status updated successfully",\n  "booking": {\n    "id": 78,\n    "status": "approved"\n  }\n}`
+                }
+            },
+            'post-booking-pay': {
+                title: 'POST /bookings/{id}/pay',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/bookings/78/pay" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>"`,
+                    js: `fetch("{HOST}/bookings/78/pay", {\n  method: "POST",\n  headers: {\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  }\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/bookings/78/pay');`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Booking payment process initiated",\n  "booking_id": 78,\n  "status": "processing_payment"\n}`
+                }
+            },
+            'post-booking-confirm': {
+                title: 'POST /bookings/{id}/confirm',
+                snippets: {
+                    curl: `curl -X POST "{HOST}/bookings/78/confirm" \\\n  -H "Content-Type: application/json" \\\n  -H "Accept: application/json" \\\n  -H "Authorization: Bearer <TOKEN>" \\\n  -d '{\n    "payment_intent_id": "pi_3Mtwb2LkdIwHu7ix1aG2M"\n  }'`,
+                    js: `fetch("{HOST}/bookings/78/confirm", {\n  method: "POST",\n  headers: {\n    "Content-Type": "application/json",\n    "Accept": "application/json",\n    "Authorization": "Bearer <TOKEN>"\n  },\n  body: JSON.stringify({\n    payment_intent_id: "pi_3Mtwb2LkdIwHu7ix1aG2M"\n  })\n}).then(res => res.json());`,
+                    php: `$response = Http::withHeaders([\n    'Accept' => 'application/json',\n    'Authorization' => 'Bearer ' . $token\n])->post('{HOST}/bookings/78/confirm', [\n    'payment_intent_id' => 'pi_3Mtwb2LkdIwHu7ix1aG2M'\n]);`
+                },
+                responses: {
+                    status: '200 OK',
+                    success: true,
+                    body: `{\n  "status": "success",\n  "message": "Payment confirmed and booking finalized",\n  "booking": {\n    "id": 78,\n    "status": "paid",\n    "payment_intent_id": "pi_3Mtwb2LkdIwHu7ix1aG2M"\n  }\n}`
+                }
+            }
+        };
+
+        // Cache highlighting keywords
+        function highlightSyntax(code, lang) {
+            if (lang === 'curl' || lang === 'js' || lang === 'php') {
+                return code
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    // Methods
+                    .replace(/(POST|GET|DELETE|PATCH|PUT)/g, '<span class="code-syntax-method">$1</span>')
+                    // Keywords
+                    .replace(/\b(const|let|var|function|return|Http|withHeaders|Http::attach|Http::attach|Http::withHeaders|Http::get|Http::post|Http::delete|Http::patch|Http::attach)\b/g, '<span class="code-syntax-keyword">$1</span>')
+                    // HTTP Headers
+                    .replace(/(Accept|Authorization|Content-Type):/g, '<span class="code-syntax-header">$1:</span>')
+                    // JSON Keys
+                    .replace(/("[\w_]+"):(\s*)/g, '<span class="code-syntax-key">$1</span>:$2')
+                    // Strings
+                    .replace(/(["'])(.*?)\1/g, '<span class="code-syntax-string">"$2"</span>')
+                    // Numbers
+                    .replace(/\b(\d+)\b/g, '<span class="code-syntax-number">$1</span>');
+            }
+            return code;
+        }
+
+        // Render code blocks for a specific active endpoint spec
+        let activeEndpointId = 'welcome';
+
+        function renderPlayground(endpointId) {
+            activeEndpointId = endpointId;
+            const spec = specs[endpointId];
+            const contentDiv = document.getElementById('code-playground-content');
+            
+            if (!spec) {
+                contentDiv.innerHTML = '';
+                return;
+            }
+
+            const activeHost = hosts[currentEnv];
+            let rawSnippet = spec.snippets[currentLang] || '';
+            // Replace host template
+            let snippet = rawSnippet.replace(/{HOST}/g, activeHost);
+            let highlightedSnippet = highlightSyntax(snippet, currentLang);
+
+            // Construct response JSON
+            let highlightedResponse = spec.responses ? highlightSyntax(spec.responses.body, 'js') : '';
+            let statusBadgeClass = spec.responses && spec.responses.success ? 'success' : 'error';
+
+            contentDiv.innerHTML = `
+                <div class="code-block-container">
+                    <div class="code-block-title">
+                        <span>REQUEST EXAMPLES</span>
+                    </div>
+                    <div class="code-block-box">
+                        <pre id="snippet-pre-container" class="code-box active"><code>${highlightedSnippet}</code></pre>
+                    </div>
+
+                    ${spec.responses ? `
+                    <div class="code-block-title" style="margin-top: 1.5rem;">
+                        <span>RESPONSE SCHEMA</span>
+                    </div>
+                    <div class="response-section">
+                        <div class="response-header-bar">
+                            <span class="response-title">Payload Response</span>
+                            <span class="response-status-badge ${statusBadgeClass}">${spec.responses.status}</span>
+                        </div>
+                        <pre class="response-body-pre"><code>${highlightedResponse}</code></pre>
+                    </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        // Select and highlight active sidebar link
+        function setActiveLink(linkElement) {
+            document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+            linkElement.classList.add('active');
+            
+            const endpointId = linkElement.getAttribute('href').substring(1);
+            renderPlayground(endpointId);
+        }
+
+        // Switch snippet language tab
+        function switchLanguage(lang) {
+            currentLang = lang;
+            document.querySelectorAll('.code-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${lang}`).classList.add('active');
+            renderPlayground(activeEndpointId);
+        }
+
+        // Switch base URL environment
+        function setEnvironment(env) {
+            currentEnv = env;
+            document.querySelectorAll('.env-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`env-${env}`).classList.add('active');
+            renderPlayground(activeEndpointId);
+        }
+
+        // Copy active snippet content to clipboard
+        function copySnippet() {
+            const pre = document.querySelector('#snippet-pre-container code');
+            if (!pre) return;
+            
+            navigator.clipboard.writeText(pre.innerText).then(() => {
+                const copyBtn = document.querySelector('.copy-btn');
+                copyBtn.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    copyBtn.innerHTML = '📋 Copy';
+                }, 2000);
+            }).catch(err => {
+                alert('Could not copy text: ' + err);
+            });
+        }
+
+        // Fuzzy search endpoints
+        function filterEndpoints() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const sections = document.querySelectorAll('.endpoint-section');
+            const sidebarLinks = document.querySelectorAll('.sidebar-links li');
+            const sidebarCategories = document.querySelectorAll('.sidebar-category');
+            
+            let matchCount = 0;
+            
+            sections.forEach(section => {
+                const id = section.getAttribute('id');
+                const titleText = section.querySelector('.endpoint-path') ? section.querySelector('.endpoint-path').textContent.toLowerCase() : '';
+                const descText = section.querySelector('.endpoint-desc') ? section.querySelector('.endpoint-desc').textContent.toLowerCase() : '';
+                const textContent = section.textContent.toLowerCase();
+                
+                // Matches ID, path title, or descriptive bodies
+                if (id === 'welcome' || id === 'authentication' || titleText.includes(query) || descText.includes(query) || textContent.includes(query)) {
+                    section.style.display = 'block';
+                    matchCount++;
+                } else {
+                    section.style.display = 'none';
+                }
+            });
+
+            // Filter Sidebar Links
+            sidebarLinks.forEach(li => {
+                const link = li.querySelector('.sidebar-link');
+                const href = link.getAttribute('href').substring(1);
+                
+                if (href === 'welcome' || href === 'authentication') {
+                    li.style.display = 'block';
+                    return;
+                }
+                
+                const section = document.getElementById(href);
+                if (section && section.style.display !== 'none') {
+                    li.style.display = 'block';
+                } else {
+                    li.style.display = 'none';
+                }
+            });
+
+            // Hide/Show Categories based on children visibility
+            sidebarCategories.forEach(cat => {
+                const links = cat.querySelectorAll('.sidebar-links li');
+                let hasVisibleLink = false;
+                links.forEach(li => {
+                    if (li.style.display !== 'none') hasVisibleLink = true;
+                });
+                
+                if (hasVisibleLink) {
+                    cat.style.display = 'block';
+                } else {
+                    cat.style.display = 'none';
+                }
+            });
+
+            // Display empty state if absolutely no match (excluding welcome sheets)
+            const emptyState = document.getElementById('search-empty-state');
+            if (matchCount <= 2 && query.length > 0) { // Only welcome + auth left
+                emptyState.style.display = 'flex';
+                document.getElementById('welcome').style.display = 'none';
+                document.getElementById('authentication').style.display = 'none';
+            } else {
+                emptyState.style.display = 'none';
+                if (query.length === 0) {
+                    document.getElementById('welcome').style.display = 'block';
+                    document.getElementById('authentication').style.display = 'block';
+                }
+            }
+        }
+
+        // Initialize Scrollspy with Intersection Observer
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPlayground('welcome');
+
+            const observerOptions = {
+                root: document.getElementById('doc-container'),
+                rootMargin: '0px 0px -60% 0px',
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        const sidebarLink = document.querySelector(`.sidebar-link[href="#${id}"]`);
+                        
+                        if (sidebarLink) {
+                            document.querySelectorAll('.sidebar-link').forEach(el => el.classList.remove('active'));
+                            sidebarLink.classList.add('active');
+                            
+                            // Synchronize scroll on sidebar
+                            const sidebar = document.querySelector('.sidebar');
+                            const offsetTop = sidebarLink.offsetTop;
+                            if (offsetTop > sidebar.clientHeight - 100) {
+                                sidebar.scrollTop = offsetTop - 100;
+                            }
+                            
+                            // Load snippet for highlighted entry
+                            renderPlayground(id);
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.endpoint-section').forEach(section => {
+                observer.observe(section);
+            });
+        });
+    </script>
+</body>
+</html>

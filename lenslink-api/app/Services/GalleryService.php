@@ -65,20 +65,26 @@ class GalleryService
     }
 
     /**
-     * Get albums for a specific gallery.
+     * Get albums, optionally filtered by gallery.
      */
-    public function getAlbumsByGallery(int $galleryId): Collection
+    public function getAlbumsByGallery(?int $galleryId = null): Collection
     {
-        return Album::where('gallery_id', $galleryId)->get();
+        $query = Album::query();
+        if ($galleryId !== null) {
+            $query->where('gallery_id', $galleryId);
+        }
+        return $query->get();
     }
 
     /**
-     * Get active images for a specific album.
+     * Get active images, optionally filtered by album.
      */
-    public function getImagesByAlbum(int $albumId): Collection
+    public function getImagesByAlbum(?int $albumId = null): Collection
     {
-        return Image::where('album_id', $albumId)
-                    ->where('status', 'active')
-                    ->get();
+        $query = Image::where('status', 'active');
+        if ($albumId !== null) {
+            $query->where('album_id', $albumId);
+        }
+        return $query->get();
     }
 }

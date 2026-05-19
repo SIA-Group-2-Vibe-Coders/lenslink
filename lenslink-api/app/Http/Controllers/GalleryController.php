@@ -89,10 +89,10 @@ class GalleryController extends Controller
     public function albums(Request $request)
     {
         $request->validate([
-            'gallery_id' => 'required|exists:galleries,id'
+            'gallery_id' => 'nullable|exists:galleries,id'
         ]);
 
-        $albums = $this->galleryService->getAlbumsByGallery($request->gallery_id);
+        $albums = $this->galleryService->getAlbumsByGallery($request->gallery_id ? (int)$request->gallery_id : null);
 
         return response()->json([
             'status' => 'success',
@@ -106,10 +106,10 @@ class GalleryController extends Controller
     public function images(Request $request)
     {
         $request->validate([
-            'album_id' => 'required|exists:albums,id'
+            'album_id' => 'nullable|exists:albums,id'
         ]);
 
-        $images = $this->galleryService->getImagesByAlbum($request->album_id);
+        $images = $this->galleryService->getImagesByAlbum($request->album_id ? (int)$request->album_id : null);
 
         return response()->json([
             'status' => 'success',
