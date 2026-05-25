@@ -40,10 +40,14 @@ class PostController extends Controller
     {
         $user = $request->user();
 
-        $uploadResult = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::uploadApi()->upload(
-            $request->file('image')->getRealPath(),
-            ['folder' => 'lenslink/posts', 'resource_type' => 'image']
-        );
+        try {
+            $uploadResult = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::uploadApi()->upload(
+                $request->file('image')->getRealPath(),
+                ['folder' => 'lenslink/posts', 'resource_type' => 'image']
+            );
+        } catch (\Exception $e) {
+            return $this->errorResponse('Image upload to Cloudinary failed: ' . $e->getMessage(), 422);
+        }
 
         $post = $this->postRepository->create([
             'user_id'   => $user->id,
