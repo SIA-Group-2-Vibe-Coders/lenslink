@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -249,10 +249,34 @@
     .info-box.danger  { border-left-color: var(--red); }
 
     /* ─── Code block ─────────────────────────────────────────────────── */
-    .code-block {
-      background: #0a0c14;
+    .code-wrap {
       border: 1px solid var(--border);
       border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+    .code-wrap-header {
+      background: #13151f;
+      border-bottom: 1px solid var(--border);
+      padding: 7px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .code-lang-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: #7dcfff;
+      letter-spacing: .5px;
+    }
+    .code-dots { display: flex; gap: 5px; margin-left: auto; }
+    .code-dot  { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot:nth-child(1) { background: #ef4444; }
+    .code-dot:nth-child(2) { background: #f59e0b; }
+    .code-dot:nth-child(3) { background: #10b981; }
+    .code-block {
+      background: #0a0c14;
       padding: 16px 20px;
       font-family: 'JetBrains Mono', monospace;
       font-size: 12.5px;
@@ -260,13 +284,13 @@
       overflow-x: auto;
       line-height: 1.7;
       position: relative;
+      border-radius: 0;
     }
     .code-block .token-key    { color: #7dcfff; }
     .code-block .token-str    { color: #9ece6a; }
     .code-block .token-num    { color: #ff9e64; }
     .code-block .token-bool   { color: #bb9af7; }
     .code-block .token-null   { color: #565f89; }
-    .code-block .token-comment{ color: #565f89; font-style: italic; }
     .code-block .token-url    { color: #73daca; }
     .code-block .token-method { font-weight: 700; }
     .code-block .token-header { color: #e0af68; }
@@ -654,9 +678,9 @@
       </div>
 
       <div class="code-label">Authorization Header</div>
-      <div class="code-block">Authorization: Bearer <span class="token-str">{your_token_here}</span>
+      <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">Authorization: Bearer <span class="token-str">{your_token_here}</span>
 Accept: application/json
-Content-Type: application/json</div>
+Content-Type: application/json</div></div>
 
       <div class="info-box" style="margin-top:16px">
         <strong>Postman tip:</strong> Set the token as a collection variable <code>{{token}}</code> and use it in the Authorization tab (Bearer Token type) across all requests.
@@ -696,13 +720,13 @@ Content-Type: application/json</div>
       <p class="section-desc">All API responses use a consistent JSON structure. HTTP status codes accurately reflect the result.</p>
 
       <div class="code-label">Standard Error Response</div>
-      <div class="code-block">{
+      <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Validation failed."</span>,
   <span class="token-key">"errors"</span>: {
     <span class="token-key">"email"</span>: [<span class="token-str">"The email field is required."</span>]
   }
-}</div>
+}</div></div>
 
       <div style="margin-top:20px">
         <table class="params-table">
@@ -730,11 +754,11 @@ Content-Type: application/json</div>
         <strong>throttle:10,1</strong> — Auth endpoints (<code>/register</code>, <code>/login</code>, <code>/auth/firebase</code>) are limited to <strong>10 requests per minute</strong> per IP. Exceeding this returns a <strong>429</strong> response with a <code>Retry-After</code> header.
       </div>
       <div class="code-label">429 Response Example</div>
-      <div class="code-block">HTTP/1.1 <span class="token-num">429</span> Too Many Requests
+      <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">HTTP/1.1 <span class="token-num">429</span> Too Many Requests
 Retry-After: <span class="token-num">42</span>
 Content-Type: application/json
 
-{<span class="token-key">"message"</span>: <span class="token-str">"Too Many Attempts."</span>}</div>
+{<span class="token-key">"message"</span>: <span class="token-str">"Too Many Attempts."</span>}</div></div>
     </div>
 
     <!-- ── Test Results ──────────────────────────────────────────────── -->
@@ -784,14 +808,14 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
-  <span class="token-key">"full_name"</span>: <span class="token-str">"Jane Doe"</span>,       <span class="token-comment">// required, string</span>
-  <span class="token-key">"email"</span>: <span class="token-str">"jane@example.com"</span>,  <span class="token-comment">// required, unique email</span>
-  <span class="token-key">"password"</span>: <span class="token-str">"secret123"</span>,     <span class="token-comment">// required, min 8 chars</span>
-  <span class="token-key">"role_id"</span>: <span class="token-num">2</span>               <span class="token-comment">// required: 1=Admin, 2=Photographer, 3=Client</span>
-}</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
+  <span class="token-key">"full_name"</span>: <span class="token-str">"Jane Doe"</span>,
+  <span class="token-key">"email"</span>: <span class="token-str">"jane@example.com"</span>,
+  <span class="token-key">"password"</span>: <span class="token-str">"secret123"</span>,
+  <span class="token-key">"role_id"</span>: <span class="token-num">2</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Registration successful"</span>,
   <span class="token-key">"data"</span>: {
@@ -804,15 +828,15 @@ Content-Type: application/json
       <span class="token-key">"created_at"</span>: <span class="token-str">"2026-05-25T02:44:45.000000Z"</span>
     }
   }
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Error — 422 Validation Failed</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Validation failed."</span>,
   <span class="token-key">"errors"</span>: {
     <span class="token-key">"email"</span>: [<span class="token-str">"An account with this email already exists."</span>]
   }
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -829,24 +853,24 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"email"</span>: <span class="token-str">"jane@example.com"</span>,
   <span class="token-key">"password"</span>: <span class="token-str">"secret123"</span>
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Login successful"</span>,
   <span class="token-key">"data"</span>: {
     <span class="token-key">"token"</span>: <span class="token-str">"7|eB0zEwa8V5EwQJKJ..."</span>,
-    <span class="token-key">"user"</span>: { <span class="token-comment">/* full user object */</span> }
+    <span class="token-key">"user"</span>: { }
   }
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Error — 422 Invalid Credentials</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"message"</span>: <span class="token-str">"Invalid credentials."</span>,
   <span class="token-key">"errors"</span>: { <span class="token-key">"email"</span>: [<span class="token-str">"Invalid credentials."</span>] }
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -863,18 +887,18 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
-  <span class="token-key">"firebase_token"</span>: <span class="token-str">"eyJhbGciOiJSUzI1NiIsImtpZ..."</span>  <span class="token-comment">// Firebase ID token from client SDK</span>
-}</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
+  <span class="token-key">"firebase_token"</span>: <span class="token-str">"eyJhbGciOiJSUzI1NiIsImtpZ..."</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Firebase sync successful"</span>,
   <span class="token-key">"data"</span>: {
     <span class="token-key">"token"</span>: <span class="token-str">"8|xKabcDef..."</span>,
-    <span class="token-key">"user"</span>: { <span class="token-comment">/* user object */</span> }
+    <span class="token-key">"user"</span>: { }
   }
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -891,7 +915,7 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"data"</span>: [
     {
@@ -905,7 +929,7 @@ Content-Type: application/json
       <span class="token-key">"price_range"</span>: <span class="token-str">"$$$"</span>
     }
   ]
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -923,14 +947,13 @@ Content-Type: application/json
         <div class="endpoint-body">
           <div class="info-box">Returns <strong>404</strong> if the user does not exist or is not a photographer.</div>
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"data"</span>: {
     <span class="token-key">"id"</span>: <span class="token-num">2</span>,
     <span class="token-key">"name"</span>: <span class="token-str">"John Vision"</span>,
-    <span class="token-comment">// ... full photographer profile</span>
   }
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -947,11 +970,11 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* array of post objects */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
         </div>
       </div>
 
@@ -967,11 +990,11 @@ Content-Type: application/json
           <span class="toggle-icon">▼</span>
         </div>
         <div class="endpoint-body">
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* gallery items */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
         </div>
       </div>
 
@@ -987,11 +1010,11 @@ Content-Type: application/json
           <span class="toggle-icon">▼</span>
         </div>
         <div class="endpoint-body">
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* album objects */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
         </div>
       </div>
 
@@ -1007,11 +1030,11 @@ Content-Type: application/json
           <span class="toggle-icon">▼</span>
         </div>
         <div class="endpoint-body">
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* image objects */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
         </div>
       </div>
 
@@ -1043,14 +1066,14 @@ Content-Type: application/json
             </tbody>
           </table>
           <div class="code-label">Example Request</div>
-          <div class="code-block">GET /api/search/location?<span class="token-key">address</span>=<span class="token-str">New York</span></div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">GET /api/search/location?<span class="token-key">address</span>=<span class="token-str">New York</span></div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* matching photographer profiles */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
           <div class="code-label" style="margin-top:16px">Error — 400 Missing Parameter</div>
-          <div class="code-block">{ <span class="token-key">"error"</span>: <span class="token-str">"Address required"</span> }</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{ <span class="token-key">"error"</span>: <span class="token-str">"Address required"</span> }</div></div>
         </div>
       </div>
     </div>
@@ -1077,7 +1100,7 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
   <span class="token-key">"data"</span>: {
@@ -1092,7 +1115,7 @@ Content-Type: application/json
     <span class="token-key">"price_range"</span>: <span class="token-null">null</span>,
     <span class="token-key">"cover_photo"</span>: <span class="token-null">null</span>
   }
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -1109,19 +1132,19 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body (all fields optional)</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"name"</span>: <span class="token-str">"Updated Name"</span>,
   <span class="token-key">"bio"</span>: <span class="token-str">"Professional photographer"</span>,
   <span class="token-key">"specialty"</span>: <span class="token-str">"Wedding"</span>,
   <span class="token-key">"location"</span>: <span class="token-str">"New York, NY"</span>,
   <span class="token-key">"price_range"</span>: <span class="token-str">"$$$"</span>
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Profile updated successfully"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* updated user object */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1138,10 +1161,10 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Logged out successfully"</span>
-}</div>
+}</div></div>
         </div>
       </div>
     </div>
@@ -1168,16 +1191,16 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
-  <span class="token-key">"caption"</span>: <span class="token-str">"Golden hour session in NYC"</span>,  <span class="token-comment">// optional</span>
-  <span class="token-key">"image_url"</span>: <span class="token-str">"https://cdn.lenslink.com/p1.jpg"</span>  <span class="token-comment">// optional</span>
-}</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
+  <span class="token-key">"caption"</span>: <span class="token-str">"Golden hour session in NYC"</span>,
+  <span class="token-key">"image_url"</span>: <span class="token-str">"https://cdn.lenslink.com/p1.jpg"</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Post created"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* newly created post */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1195,10 +1218,10 @@ Content-Type: application/json
         <div class="endpoint-body">
           <div class="info-box">Returns <strong>403</strong> if the authenticated user is not the post owner.</div>
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Post deleted"</span>
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -1215,10 +1238,10 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
-  <span class="token-key">"message"</span>: <span class="token-str">"Post liked"</span>   <span class="token-comment">// or "Post unliked"</span>
-}</div>
+  <span class="token-key">"message"</span>: <span class="token-str">"Post liked"</span>
+}</div></div>
         </div>
       </div>
 
@@ -1235,15 +1258,15 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
-  <span class="token-key">"body"</span>: <span class="token-str">"Amazing shot!"</span>  <span class="token-comment">// required</span>
-}</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
+  <span class="token-key">"body"</span>: <span class="token-str">"Amazing shot!"</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Comment added"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* comment object */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
     </div>
@@ -1270,10 +1293,10 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* message objects */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
         </div>
       </div>
 
@@ -1290,16 +1313,16 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"receiver_id"</span>: <span class="token-num">2</span>,
   <span class="token-key">"body"</span>: <span class="token-str">"Hi, I'd like to book a session!"</span>
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Message sent"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* message object */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1316,10 +1339,10 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
-  <span class="token-key">"data"</span>: [ <span class="token-comment">/* conversation threads with latest message */</span> ]
-}</div>
+  <span class="token-key">"data"</span>: [ ]
+}</div></div>
         </div>
       </div>
     </div>
@@ -1346,16 +1369,16 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"title"</span>: <span class="token-str">"Wedding Collection 2026"</span>,
-  <span class="token-key">"description"</span>: <span class="token-str">"Spring weddings gallery"</span>  <span class="token-comment">// optional</span>
-}</div>
+  <span class="token-key">"description"</span>: <span class="token-str">"Spring weddings gallery"</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Gallery created"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* gallery object */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1372,10 +1395,10 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"gallery_id"</span>: <span class="token-num">1</span>,
   <span class="token-key">"title"</span>: <span class="token-str">"Ceremony"</span>
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -1393,10 +1416,10 @@ Content-Type: application/json
         <div class="endpoint-body">
           <div class="info-box">Send as <code>multipart/form-data</code> for file upload, or pass a URL string.</div>
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"album_id"</span>: <span class="token-num">1</span>,
-  <span class="token-key">"image"</span>: <span class="token-str">"&lt;file&gt;"</span>   <span class="token-comment">// multipart file or URL</span>
-}</div>
+  <span class="token-key">"image"</span>: <span class="token-str">"&lt;file&gt;"</span>
+}</div></div>
         </div>
       </div>
 
@@ -1413,14 +1436,14 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"image_id"</span>: <span class="token-num">5</span>
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Image archived"</span>
-}</div>
+}</div></div>
         </div>
       </div>
     </div>
@@ -1447,7 +1470,7 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"data"</span>: [
     {
@@ -1459,7 +1482,7 @@ Content-Type: application/json
       <span class="token-key">"amount"</span>: <span class="token-num">500.00</span>
     }
   ]
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -1477,10 +1500,10 @@ Content-Type: application/json
         <div class="endpoint-body">
           <div class="info-box">Returns <strong>403</strong> if the booking does not belong to the authenticated user.</div>
           <div class="code-label">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* full booking object */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1497,17 +1520,17 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"photographer_id"</span>: <span class="token-num">2</span>,
   <span class="token-key">"date"</span>: <span class="token-str">"2026-06-15"</span>,
   <span class="token-key">"notes"</span>: <span class="token-str">"Beach wedding, golden hour preferred"</span>
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Booking created"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* new booking object */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1524,15 +1547,15 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
-  <span class="token-key">"status"</span>: <span class="token-str">"accepted"</span>  <span class="token-comment">// "accepted" | "declined" | "completed" | "cancelled"</span>
-}</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"accepted"</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Booking status updated"</span>,
-  <span class="token-key">"data"</span>: { <span class="token-comment">/* updated booking */</span> }
-}</div>
+  <span class="token-key">"data"</span>: { }
+}</div></div>
         </div>
       </div>
 
@@ -1549,14 +1572,14 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
-  <span class="token-key">"payment_method_id"</span>: <span class="token-str">"pm_card_visa"</span>  <span class="token-comment">// Stripe PaymentMethod ID</span>
-}</div>
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
+  <span class="token-key">"payment_method_id"</span>: <span class="token-str">"pm_card_visa"</span>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Payment processed"</span>
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -1573,9 +1596,9 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"payment_intent_id"</span>: <span class="token-str">"pi_3OsABC..."</span>
-}</div>
+}</div></div>
         </div>
       </div>
 
@@ -1592,14 +1615,14 @@ Content-Type: application/json
         </div>
         <div class="endpoint-body">
           <div class="code-label">Request Body</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"booking_id"</span>: <span class="token-num">1</span>
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"client_secret"</span>: <span class="token-str">"pi_3OsABC_secret_..."</span>
-}</div>
+}</div></div>
         </div>
       </div>
     </div>
@@ -1629,7 +1652,7 @@ Content-Type: application/json
             Requires <code>role_id: 1</code>. Accessing with a non-admin token returns <strong>403 Forbidden</strong>.
           </div>
           <div class="code-label">Success Response — 200 OK (Admin token)</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
   <span class="token-key">"data"</span>: {
     <span class="token-key">"total_users"</span>: <span class="token-num">9</span>,
@@ -1638,12 +1661,12 @@ Content-Type: application/json
     <span class="token-key">"total_bookings"</span>: <span class="token-num">12</span>,
     <span class="token-key">"total_posts"</span>: <span class="token-num">24</span>
   }
-}</div>
+}</div></div>
           <div class="code-label" style="margin-top:16px">Error — 403 Forbidden (non-admin)</div>
-          <div class="code-block">{
+          <div class="code-wrap"><div class="code-wrap-header"><span class="code-lang-badge">JSON</span><div class="code-dots"><span class="code-dot"></span><span class="code-dot"></span><span class="code-dot"></span></div></div><div class="code-block">{
   <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,
   <span class="token-key">"message"</span>: <span class="token-str">"Forbidden. Admin access required."</span>
-}</div>
+}</div></div>
         </div>
       </div>
     </div>
