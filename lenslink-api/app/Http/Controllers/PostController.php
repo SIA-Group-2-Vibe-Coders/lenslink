@@ -2,157 +2,112 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Post;
-use App\Models\Like;
-use App\Models\Comment;
+use App\Http\Requests\StorePostRequest;
+use App\Http\Traits\ApiResponse;
+use App\Repositories\PostRepository;
 use Illuminate\Http\Request;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 
 class PostController extends Controller
 {
+    use ApiResponse;
+
+    public function __construct(protected PostRepository $postRepository) {}
+
     /**
-     * Display a listing of social posts.
+     * GET /posts
+     * List all social posts. Optionally marks liked posts if user is authenticated.
      */
     public function index(Request $request)
     {
-        $posts = Post::with(['user:id,name,avatar', 'comments.user:id,name,avatar'])
-            ->withCount(['likes', 'comments'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $posts = $this->postRepository->getAllWithCounts();
 
-        // If authenticated, check if the current user has liked each post
         $user = $request->user('sanctum');
         if ($user) {
-            $userLikedPostIds = Like::where('user_id', $user->id)
-                ->pluck('post_id')
-                ->toArray();
-
-            $posts->each(function ($post) use ($userLikedPostIds) {
-                $post->user_has_liked = in_array($post->id, $userLikedPostIds);
-            });
+            $likedIds = $this->postRepository->getLikedPostIds($user->id);
+            $posts->each(fn ($post) => $post->user_has_liked = in_array($post->id, $likedIds));
         } else {
-            $posts->each(function ($post) {
-                $post->user_has_liked = false;
-            });
+            $posts->each(fn ($post) => $post->user_has_liked = false);
         }
 
-        return response()->json([
-            'status' => 'success',
-            'data' => $posts
-        ]);
+        return $this->successResponse($posts);
     }
 
     /**
-     * Store a newly created social post.
+     * POST /posts
+     * Create a new social post with a Cloudinary image upload.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $request->validate([
-            'image' => 'required|image|max:10240', // max 10MB
-            'caption' => 'nullable|string',
-            'location' => 'nullable|string',
-        ]);
-
         $user = $request->user();
 
-        // Upload to Cloudinary
-        $file = $request->file('image');
-        $uploadResult = Cloudinary::uploadApi()->upload($file->getRealPath(), [
-            'folder' => 'lenslink/posts',
-            'resource_type' => 'image',
+        $uploadResult = \CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary::uploadApi()->upload(
+            $request->file('image')->getRealPath(),
+            ['folder' => 'lenslink/posts', 'resource_type' => 'image']
+        );
+
+        $post = $this->postRepository->create([
+            'user_id'   => $user->id,
+            'image_url' => $uploadResult['secure_url'],
+            'caption'   => $request->validated('caption'),
+            'location'  => $request->validated('location'),
         ]);
 
-        $imageUrl = $uploadResult['secure_url'];
-
-        $post = Post::create([
-            'user_id' => $user->id,
-            'image_url' => $imageUrl,
-            'caption' => $request->caption,
-            'location' => $request->location,
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Post created successfully',
-            'data' => $post->load('user:id,name,avatar')
-        ], 210); // Use 201 Created or 200
+        return $this->createdResponse(
+            $post->load('user:id,name,avatar'),
+            'Post created successfully'
+        );
     }
 
     /**
-     * Remove the specified social post.
+     * DELETE /posts/{id}
+     * Delete a post — only the owner can delete it.
      */
-    public function destroy(Request $request, $id)
+    public function destroy(Request $request, int $id)
     {
-        $post = Post::findOrFail($id);
-        $user = $request->user();
+        $post = $this->postRepository->findOrFail($id);
 
-        if ($post->user_id !== $user->id) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized to delete this post'
-            ], 403);
+        if ($post->user_id !== $request->user()->id) {
+            return $this->forbiddenResponse('You are not authorized to delete this post.');
         }
 
-        $post->delete();
+        $this->postRepository->delete($post);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Post deleted successfully'
-        ]);
+        return $this->successResponse(null, 'Post deleted successfully');
     }
 
     /**
+     * POST /posts/{id}/like
      * Toggle like/unlike on a post.
      */
-    public function toggleLike(Request $request, $id)
+    public function toggleLike(Request $request, int $id)
     {
-        $post = Post::findOrFail($id);
-        $user = $request->user();
+        $post  = $this->postRepository->findOrFail($id);
+        $liked = $this->postRepository->toggleLike($post, $request->user()->id);
 
-        $like = Like::where('post_id', $post->id)
-            ->where('user_id', $user->id)
-            ->first();
-
-        if ($like) {
-            $like->delete();
-            $liked = false;
-        } else {
-            Like::create([
-                'post_id' => $post->id,
-                'user_id' => $user->id
-            ]);
-            $liked = true;
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'liked' => $liked,
-            'likes_count' => $post->likes()->count()
+        return $this->successResponse([
+            'liked'       => $liked,
+            'likes_count' => $this->postRepository->getLikeCount($post),
         ]);
     }
 
     /**
+     * POST /posts/{id}/comment
      * Add a comment to a post.
      */
-    public function addComment(Request $request, $id)
+    public function addComment(Request $request, int $id)
     {
-        $request->validate([
-            'content' => 'required|string|max:1000',
-        ]);
+        $request->validate(['content' => 'required|string|max:1000']);
 
-        $post = Post::findOrFail($id);
-        $user = $request->user();
+        $post    = $this->postRepository->findOrFail($id);
+        $comment = $this->postRepository->addComment(
+            $post,
+            $request->user()->id,
+            strip_tags(trim($request->content))
+        );
 
-        $comment = Comment::create([
-            'post_id' => $post->id,
-            'user_id' => $user->id,
-            'content' => $request->content
-        ]);
-
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Comment added successfully',
-            'data' => $comment->load('user:id,name,avatar')
-        ]);
+        return $this->createdResponse(
+            $comment->load('user:id,name,avatar'),
+            'Comment added successfully'
+        );
     }
 }

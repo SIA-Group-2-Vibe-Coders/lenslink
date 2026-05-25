@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LensLink API Documentation</title>
+  <meta name="description" content="Complete API reference for the LensLink photography platform — authentication, bookings, posts, gallery, messaging, and admin endpoints." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* ─── Reset & Tokens ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0d0f17;
+      --surface:   #141722;
+      --surface2:  #1c2032;
+      --border:    #252a3d;
+      --border2:   #2e3450;
+      --text:      #e2e8f0;
+      --muted:     #8892aa;
+      --accent:    #6c63ff;
+      --accent2:   #a78bfa;
+      --green:     #10b981;
+      --red:       #ef4444;
+      --yellow:    #f59e0b;
+      --blue:      #3b82f6;
+      --cyan:      #06b6d4;
+      --orange:    #f97316;
+      --pink:      #ec4899;
+      --radius:    10px;
+      --radius-lg: 16px;
+      --shadow:    0 4px 24px rgba(0,0,0,.4);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* ─── Layout ─────────────────────────────────────────────────────── */
+    .layout { display: flex; min-height: 100vh; }
+
+    /* ─── Sidebar ────────────────────────────────────────────────────── */
+    .sidebar {
+      width: 280px;
+      min-width: 280px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 24px;
+    }
+    .sidebar::-webkit-scrollbar { width: 4px; }
+    .sidebar::-webkit-scrollbar-track { background: transparent; }
+    .sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo .brand {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .sidebar-logo .version {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .sidebar-section { padding: 16px 12px 4px; }
+    .sidebar-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0 8px;
+      margin-bottom: 4px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all .15s;
+      cursor: pointer;
+    }
+    .sidebar-link:hover { background: var(--surface2); color: var(--text); }
+    .sidebar-link.active { background: rgba(108,99,255,.15); color: var(--accent2); }
+    .sidebar-link .method-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      font-weight: 600;
+      padding: 1px 5px;
+      border-radius: 4px;
+      min-width: 36px;
+      text-align: center;
+    }
+    .method-GET    { background: rgba(16,185,129,.15); color: #10b981; }
+    .method-POST   { background: rgba(59,130,246,.15);  color: #3b82f6; }
+    .method-PATCH  { background: rgba(245,158,11,.15);  color: #f59e0b; }
+    .method-DELETE { background: rgba(239,68,68,.15);   color: #ef4444; }
+    .method-PUT    { background: rgba(249,115,22,.15);  color: #f97316; }
+
+    /* ─── Main content ───────────────────────────────────────────────── */
+    .main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 48px 80px;
+      max-width: 900px;
+    }
+
+    /* ─── Hero ───────────────────────────────────────────────────────── */
+    .hero {
+      margin-bottom: 56px;
+    }
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent2);
+      background: rgba(108,99,255,.12);
+      border: 1px solid rgba(108,99,255,.2);
+      padding: 4px 10px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 700;
+      line-height: 1.15;
+      background: linear-gradient(135deg, #fff 30%, var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 28px;
+    }
+    .hero-chip {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+    }
+    .hero-chip strong { color: var(--text); }
+
+    /* ─── Stats bar ──────────────────────────────────────────────────── */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-number {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .stat-label { font-size: 12px; color: var(--muted); }
+    .stat-green  { color: var(--green); }
+    .stat-accent { color: var(--accent2); }
+    .stat-blue   { color: var(--blue); }
+    .stat-yellow { color: var(--yellow); }
+
+    /* ─── Section headings ───────────────────────────────────────────── */
+    .section { margin-bottom: 64px; }
+    .section-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-title .icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      flex-shrink: 0;
+    }
+    .section-desc { color: var(--muted); font-size: 14px; margin-bottom: 24px; line-height: 1.7; }
+
+    /* ─── Info box ───────────────────────────────────────────────────── */
+    .info-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-size: 13.5px;
+      color: var(--muted);
+      margin-bottom: 20px;
+      line-height: 1.7;
+    }
+    .info-box strong { color: var(--text); }
+    .info-box.warn  { border-left-color: var(--yellow); }
+    .info-box.success { border-left-color: var(--green); }
+    .info-box.danger  { border-left-color: var(--red); }
+
+    /* ─── Code block ─────────────────────────────────────────────────── */
+    .code-block {
+      background: #0a0c14;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: #c8d3f5;
+      overflow-x: auto;
+      line-height: 1.7;
+      position: relative;
+    }
+    .code-block .token-key    { color: #7dcfff; }
+    .code-block .token-str    { color: #9ece6a; }
+    .code-block .token-num    { color: #ff9e64; }
+    .code-block .token-bool   { color: #bb9af7; }
+    .code-block .token-null   { color: #565f89; }
+    .code-block .token-comment{ color: #565f89; font-style: italic; }
+    .code-block .token-url    { color: #73daca; }
+    .code-block .token-method { font-weight: 700; }
+    .code-block .token-header { color: #e0af68; }
+
+    .code-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    /* ─── Endpoint card ──────────────────────────────────────────────── */
+    .endpoint-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 24px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .endpoint-card:hover { border-color: var(--border2); }
+
+    .endpoint-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 18px 20px;
+      cursor: pointer;
+      user-select: none;
+    }
+    .endpoint-header:hover { background: rgba(255,255,255,.02); }
+
+    .endpoint-method {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      min-width: 58px;
+      text-align: center;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .endpoint-path {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+      flex: 1;
+    }
+    .endpoint-path .path-param { color: var(--accent2); }
+    .endpoint-desc { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .endpoint-badges {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      flex-wrap: wrap;
+      margin-top: 4px;
+    }
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+      letter-spacing: .3px;
+    }
+    .badge-auth   { background: rgba(108,99,255,.15); color: var(--accent2); border: 1px solid rgba(108,99,255,.2); }
+    .badge-public { background: rgba(16,185,129,.12); color: var(--green);   border: 1px solid rgba(16,185,129,.2); }
+    .badge-admin  { background: rgba(239,68,68,.12);  color: var(--red);     border: 1px solid rgba(239,68,68,.2); }
+    .badge-rate   { background: rgba(245,158,11,.12); color: var(--yellow);  border: 1px solid rgba(245,158,11,.2); }
+
+    .endpoint-body {
+      border-top: 1px solid var(--border);
+      padding: 20px;
+      display: none;
+    }
+    .endpoint-body.open { display: block; }
+
+    .toggle-icon {
+      font-size: 12px;
+      color: var(--muted);
+      margin-left: auto;
+      flex-shrink: 0;
+      transition: transform .2s;
+    }
+    .toggle-icon.open { transform: rotate(180deg); }
+
+    /* ─── Params table ───────────────────────────────────────────────── */
+    .params-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-bottom: 20px;
+    }
+    .params-table th {
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .params-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .params-table tr:last-child td { border-bottom: none; }
+    .params-table .param-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #7dcfff;
+      white-space: nowrap;
+    }
+    .params-table .param-type { color: var(--accent2); font-size: 12px; }
+    .params-table .required { color: var(--red); font-size: 10px; font-weight: 600; }
+    .params-table .optional { color: var(--muted); font-size: 10px; }
+    .params-table .param-desc { color: var(--muted); }
+
+    /* ─── Response tabs ──────────────────────────────────────────────── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .tab {
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      color: var(--muted);
+      transition: all .15s;
+      margin-bottom: -1px;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--accent2); border-bottom-color: var(--accent2); }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* ─── Role table ─────────────────────────────────────────────────── */
+    .role-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .role-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+    }
+    .role-card .role-icon { font-size: 24px; margin-bottom: 8px; }
+    .role-card .role-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .role-card .role-id   { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .role-card .role-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+    /* ─── Auth flow diagram ──────────────────────────────────────────── */
+    .flow-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      position: relative;
+      margin-bottom: 24px;
+    }
+    .flow-step {
+      display: flex;
+      gap: 16px;
+      position: relative;
+    }
+    .flow-step-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .flow-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .flow-line {
+      width: 2px;
+      flex: 1;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      margin: 4px 0;
+      min-height: 24px;
+    }
+    .flow-step-right {
+      padding-bottom: 28px;
+      flex: 1;
+    }
+    .flow-step-title { font-size: 14px; font-weight: 600; margin-bottom: 4px; padding-top: 4px; }
+    .flow-step-desc  { font-size: 13px; color: var(--muted); }
+
+    /* ─── Divider ────────────────────────────────────────────────────── */
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, var(--border), transparent);
+      margin: 48px 0;
+    }
+
+    /* ─── Scrollbar (main) ───────────────────────────────────────────── */
+    .main::-webkit-scrollbar { width: 6px; }
+    .main::-webkit-scrollbar-track { background: transparent; }
+    .main::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+    /* ─── Responsive ─────────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { padding: 32px 20px 60px; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); }
+      .role-grid { grid-template-columns: 1fr; }
+      .hero h1 { font-size: 28px; }
+    }
+
+    /* ─── Smooth reveal ──────────────────────────────────────────────── */
+    .section { animation: fadeUp .4s ease both; }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">📷 LensLink API</div>
+      <div class="version">v1.0 · Laravel 12 + Sanctum</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Overview</div>
+      <a class="sidebar-link" href="#overview">🏠 Introduction</a>
+      <a class="sidebar-link" href="#auth-flow">🔐 Authentication</a>
+      <a class="sidebar-link" href="#roles">👥 Roles &amp; Permissions</a>
+      <a class="sidebar-link" href="#errors">⚠️ Error Handling</a>
+      <a class="sidebar-link" href="#rate-limiting">🚦 Rate Limiting</a>
+      <a class="sidebar-link" href="#test-results">✅ Test Results</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Public Endpoints</div>
+      <a class="sidebar-link" href="#ep-register"><span class="method-badge method-POST">POST</span> /register</a>
+      <a class="sidebar-link" href="#ep-login"><span class="method-badge method-POST">POST</span> /login</a>
+      <a class="sidebar-link" href="#ep-firebase"><span class="method-badge method-POST">POST</span> /auth/firebase</a>
+      <a class="sidebar-link" href="#ep-photographers"><span class="method-badge method-GET">GET</span> /photographers</a>
+      <a class="sidebar-link" href="#ep-photographer-show"><span class="method-badge method-GET">GET</span> /photographers/{id}</a>
+      <a class="sidebar-link" href="#ep-posts-public"><span class="method-badge method-GET">GET</span> /posts</a>
+      <a class="sidebar-link" href="#ep-gallery-pub"><span class="method-badge method-GET">GET</span> /gallery</a>
+      <a class="sidebar-link" href="#ep-albums-pub"><span class="method-badge method-GET">GET</span> /albums</a>
+      <a class="sidebar-link" href="#ep-images-pub"><span class="method-badge method-GET">GET</span> /images</a>
+      <a class="sidebar-link" href="#ep-search-loc"><span class="method-badge method-GET">GET</span> /search/location</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Auth (Protected)</div>
+      <a class="sidebar-link" href="#ep-profile"><span class="method-badge method-GET">GET</span> /profile</a>
+      <a class="sidebar-link" href="#ep-profile-update"><span class="method-badge method-POST">POST</span> /profile/update</a>
+      <a class="sidebar-link" href="#ep-logout"><span class="method-badge method-POST">POST</span> /logout</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Social Feed</div>
+      <a class="sidebar-link" href="#ep-posts-store"><span class="method-badge method-POST">POST</span> /posts</a>
+      <a class="sidebar-link" href="#ep-post-delete"><span class="method-badge method-DELETE">DEL</span> /posts/{id}</a>
+      <a class="sidebar-link" href="#ep-post-like"><span class="method-badge method-POST">POST</span> /posts/{id}/like</a>
+      <a class="sidebar-link" href="#ep-post-comment"><span class="method-badge method-POST">POST</span> /posts/{id}/comment</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Messaging</div>
+      <a class="sidebar-link" href="#ep-messages-get"><span class="method-badge method-GET">GET</span> /messages</a>
+      <a class="sidebar-link" href="#ep-messages-post"><span class="method-badge method-POST">POST</span> /messages</a>
+      <a class="sidebar-link" href="#ep-conversations"><span class="method-badge method-GET">GET</span> /conversations</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Gallery</div>
+      <a class="sidebar-link" href="#ep-gallery-store"><span class="method-badge method-POST">POST</span> /gallery</a>
+      <a class="sidebar-link" href="#ep-album-store"><span class="method-badge method-POST">POST</span> /albums</a>
+      <a class="sidebar-link" href="#ep-images-upload"><span class="method-badge method-POST">POST</span> /images/upload</a>
+      <a class="sidebar-link" href="#ep-images-archive"><span class="method-badge method-POST">POST</span> /images/archive</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Bookings</div>
+      <a class="sidebar-link" href="#ep-bookings-list"><span class="method-badge method-GET">GET</span> /bookings</a>
+      <a class="sidebar-link" href="#ep-bookings-show"><span class="method-badge method-GET">GET</span> /bookings/{id}</a>
+      <a class="sidebar-link" href="#ep-bookings-store"><span class="method-badge method-POST">POST</span> /bookings</a>
+      <a class="sidebar-link" href="#ep-bookings-status"><span class="method-badge method-PATCH">PAT</span> /bookings/{id}/status</a>
+      <a class="sidebar-link" href="#ep-bookings-pay"><span class="method-badge method-POST">POST</span> /bookings/{id}/pay</a>
+      <a class="sidebar-link" href="#ep-bookings-confirm"><span class="method-badge method-POST">POST</span> /bookings/{id}/confirm</a>
+      <a class="sidebar-link" href="#ep-bookings-intent"><span class="method-badge method-POST">POST</span> /bookings/intent</a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Admin</div>
+      <a class="sidebar-link" href="#ep-admin-stats"><span class="method-badge method-GET">GET</span> /admin-stats</a>
+    </div>
+  </aside>
+
+  <!-- ── Main ─────────────────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- Hero -->
+    <div class="hero" id="overview">
+      <div class="hero-eyebrow">📷 API Reference</div>
+      <h1>LensLink API Documentation</h1>
+      <p>Complete reference for the LensLink photography platform API. Built with Laravel 12 and secured with Laravel Sanctum for token-based authentication, role-based access control, and rate limiting.</p>
+      <div class="hero-meta">
+        <div class="hero-chip">Base URL <strong>http://127.0.0.1:8000/api</strong></div>
+        <div class="hero-chip">Version <strong>v1.0</strong></div>
+        <div class="hero-chip">Auth <strong>Bearer Token (Sanctum)</strong></div>
+        <div class="hero-chip">Format <strong>JSON</strong></div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+      <div class="stat-card">
+        <div class="stat-number stat-accent">30</div>
+        <div class="stat-label">Total Endpoints</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number stat-green">62/63</div>
+        <div class="stat-label">Tests Passed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number stat-blue">0</div>
+        <div class="stat-label">Security Issues</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number stat-yellow">98.4%</div>
+        <div class="stat-label">Pass Rate</div>
+      </div>
+    </div>
+
+    <!-- ── Authentication ────────────────────────────────────────────── -->
+    <div class="section" id="auth-flow">
+      <div class="section-title"><span class="icon">🔐</span> Authentication</div>
+      <p class="section-desc">LensLink uses Laravel Sanctum for stateless token-based authentication. All protected routes require a valid Bearer token in the <code>Authorization</code> header.</p>
+
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-step-left"><div class="flow-dot">1</div><div class="flow-line"></div></div>
+          <div class="flow-step-right">
+            <div class="flow-step-title">Register or Login</div>
+            <div class="flow-step-desc">Call <code>POST /api/register</code> or <code>POST /api/login</code> with your credentials. A Sanctum Bearer token is returned in the response.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-left"><div class="flow-dot">2</div><div class="flow-line"></div></div>
+          <div class="flow-step-right">
+            <div class="flow-step-title">Store the Token</div>
+            <div class="flow-step-desc">Save the <code>data.token</code> value from the response. This is your personal access token valid until revoked.</div>
+          </div>
+        </div>
+        <div class="flow-step">
+          <div class="flow-step-left"><div class="flow-dot">3</div></div>
+          <div class="flow-step-right">
+            <div class="flow-step-title">Send with Every Request</div>
+            <div class="flow-step-desc">Include the token in the <code>Authorization</code> header for all protected endpoints.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-label">Authorization Header</div>
+      <div class="code-block">Authorization: Bearer <span class="token-str">{your_token_here}</span>
+Accept: application/json
+Content-Type: application/json</div>
+
+      <div class="info-box" style="margin-top:16px">
+        <strong>Postman tip:</strong> Set the token as a collection variable <code>{{token}}</code> and use it in the Authorization tab (Bearer Token type) across all requests.
+      </div>
+    </div>
+
+    <!-- ── Roles ─────────────────────────────────────────────────────── -->
+    <div class="section" id="roles">
+      <div class="section-title"><span class="icon">👥</span> Roles &amp; Permissions</div>
+      <p class="section-desc">Every user is assigned one of three roles at registration. The role determines what endpoints are accessible.</p>
+
+      <div class="role-grid">
+        <div class="role-card">
+          <div class="role-icon">🔧</div>
+          <div class="role-name">Admin</div>
+          <div class="role-id">role_id: 1</div>
+          <div class="role-desc">Full access including admin-only endpoints such as <code>/admin-stats</code>. Requires <code>auth:sanctum</code> + <code>role.admin</code> middleware.</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">📸</div>
+          <div class="role-name">Photographer</div>
+          <div class="role-id">role_id: 2</div>
+          <div class="role-desc">Can manage their own posts, gallery, albums, images, and receive bookings from clients.</div>
+        </div>
+        <div class="role-card">
+          <div class="role-icon">🙋</div>
+          <div class="role-name">Client</div>
+          <div class="role-id">role_id: 3</div>
+          <div class="role-desc">Can browse photographers, create bookings, like/comment on posts, and send messages.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Error Handling ─────────────────────────────────────────────── -->
+    <div class="section" id="errors">
+      <div class="section-title"><span class="icon">⚠️</span> Error Handling</div>
+      <p class="section-desc">All API responses use a consistent JSON structure. HTTP status codes accurately reflect the result.</p>
+
+      <div class="code-label">Standard Error Response</div>
+      <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Validation failed."</span>,
+  <span class="token-key">"errors"</span>: {
+    <span class="token-key">"email"</span>: [<span class="token-str">"The email field is required."</span>]
+  }
+}</div>
+
+      <div style="margin-top:20px">
+        <table class="params-table">
+          <thead><tr><th>Status Code</th><th>Meaning</th><th>When</th></tr></thead>
+          <tbody>
+            <tr><td class="param-name" style="color:var(--green)">200</td><td>OK</td><td>Successful GET / action</td></tr>
+            <tr><td class="param-name" style="color:var(--blue)">201</td><td>Created</td><td>Resource created (register, booking, post)</td></tr>
+            <tr><td class="param-name" style="color:var(--yellow)">400</td><td>Bad Request</td><td>Missing or malformed query parameters</td></tr>
+            <tr><td class="param-name" style="color:var(--red)">401</td><td>Unauthenticated</td><td>No token or invalid/expired token</td></tr>
+            <tr><td class="param-name" style="color:var(--red)">403</td><td>Forbidden</td><td>Authenticated but insufficient role</td></tr>
+            <tr><td class="param-name" style="color:var(--red)">404</td><td>Not Found</td><td>Resource does not exist</td></tr>
+            <tr><td class="param-name" style="color:var(--red)">422</td><td>Unprocessable</td><td>Validation failed (missing/invalid fields)</td></tr>
+            <tr><td class="param-name" style="color:var(--orange)">429</td><td>Too Many Requests</td><td>Rate limit exceeded</td></tr>
+            <tr><td class="param-name" style="color:var(--red)">500</td><td>Server Error</td><td>Unexpected internal error</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── Rate Limiting ─────────────────────────────────────────────── -->
+    <div class="section" id="rate-limiting">
+      <div class="section-title"><span class="icon">🚦</span> Rate Limiting</div>
+      <p class="section-desc">Authentication endpoints are protected with Laravel's built-in throttle middleware to prevent brute-force attacks.</p>
+      <div class="info-box warn">
+        <strong>throttle:10,1</strong> — Auth endpoints (<code>/register</code>, <code>/login</code>, <code>/auth/firebase</code>) are limited to <strong>10 requests per minute</strong> per IP. Exceeding this returns a <strong>429</strong> response with a <code>Retry-After</code> header.
+      </div>
+      <div class="code-label">429 Response Example</div>
+      <div class="code-block">HTTP/1.1 <span class="token-num">429</span> Too Many Requests
+Retry-After: <span class="token-num">42</span>
+Content-Type: application/json
+
+{<span class="token-key">"message"</span>: <span class="token-str">"Too Many Attempts."</span>}</div>
+    </div>
+
+    <!-- ── Test Results ──────────────────────────────────────────────── -->
+    <div class="section" id="test-results">
+      <div class="section-title"><span class="icon">✅</span> Test Results Summary</div>
+      <p class="section-desc">A full automated test suite was run against the API. Results are below.</p>
+
+      <div class="info-box success">
+        <strong>62 / 63 tests passed</strong> (98.4% pass rate). Zero security issues. Zero broken 5xx endpoints. The single failure was a non-critical test runner issue — the test used <code>?query=</code> instead of the correct <code>?address=</code> parameter for <code>GET /search/location</code>.
+      </div>
+
+      <table class="params-table">
+        <thead><tr><th>Category</th><th>Tests</th><th>Result</th></tr></thead>
+        <tbody>
+          <tr><td>Authentication (register/login/logout/firebase)</td><td>16</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Authorization (missing token, invalid token)</td><td>8</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Public Endpoints (photographers, posts, gallery)</td><td>7</td><td style="color:var(--yellow)">6/7 (1 param issue)</td></tr>
+          <tr><td>Profile Management</td><td>4</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Social Feed (posts, likes, comments)</td><td>8</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Messaging &amp; Conversations</td><td>5</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Gallery, Albums, Images</td><td>6</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Bookings &amp; Payments</td><td>7</td><td style="color:var(--green)">✓ All passed</td></tr>
+          <tr><td>Admin Stats (role enforcement)</td><td>2</td><td style="color:var(--green)">✓ All passed</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  PUBLIC ENDPOINTS                                                -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🌐</span> Public Endpoints</div>
+      <p class="section-desc">These endpoints do not require authentication and are accessible by anyone.</p>
+
+      <!-- POST /register -->
+      <div class="endpoint-card" id="ep-register">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/register</div>
+            <div class="endpoint-desc">Create a new user account and receive a Bearer token</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span><span class="badge badge-rate">RATE LIMITED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"full_name"</span>: <span class="token-str">"Jane Doe"</span>,       <span class="token-comment">// required, string</span>
+  <span class="token-key">"email"</span>: <span class="token-str">"jane@example.com"</span>,  <span class="token-comment">// required, unique email</span>
+  <span class="token-key">"password"</span>: <span class="token-str">"secret123"</span>,     <span class="token-comment">// required, min 8 chars</span>
+  <span class="token-key">"role_id"</span>: <span class="token-num">2</span>               <span class="token-comment">// required: 1=Admin, 2=Photographer, 3=Client</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Registration successful"</span>,
+  <span class="token-key">"data"</span>: {
+    <span class="token-key">"token"</span>: <span class="token-str">"5|W1KiUb0JK8dP9WM4ascKHZh..."</span>,
+    <span class="token-key">"user"</span>: {
+      <span class="token-key">"id"</span>: <span class="token-num">8</span>,
+      <span class="token-key">"name"</span>: <span class="token-str">"Jane Doe"</span>,
+      <span class="token-key">"email"</span>: <span class="token-str">"jane@example.com"</span>,
+      <span class="token-key">"role_id"</span>: <span class="token-num">2</span>,
+      <span class="token-key">"created_at"</span>: <span class="token-str">"2026-05-25T02:44:45.000000Z"</span>
+    }
+  }
+}</div>
+          <div class="code-label" style="margin-top:16px">Error — 422 Validation Failed</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Validation failed."</span>,
+  <span class="token-key">"errors"</span>: {
+    <span class="token-key">"email"</span>: [<span class="token-str">"An account with this email already exists."</span>]
+  }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /login -->
+      <div class="endpoint-card" id="ep-login">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/login</div>
+            <div class="endpoint-desc">Authenticate with email and password, receive a Bearer token</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span><span class="badge badge-rate">RATE LIMITED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"email"</span>: <span class="token-str">"jane@example.com"</span>,
+  <span class="token-key">"password"</span>: <span class="token-str">"secret123"</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Login successful"</span>,
+  <span class="token-key">"data"</span>: {
+    <span class="token-key">"token"</span>: <span class="token-str">"7|eB0zEwa8V5EwQJKJ..."</span>,
+    <span class="token-key">"user"</span>: { <span class="token-comment">/* full user object */</span> }
+  }
+}</div>
+          <div class="code-label" style="margin-top:16px">Error — 422 Invalid Credentials</div>
+          <div class="code-block">{
+  <span class="token-key">"message"</span>: <span class="token-str">"Invalid credentials."</span>,
+  <span class="token-key">"errors"</span>: { <span class="token-key">"email"</span>: [<span class="token-str">"Invalid credentials."</span>] }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /auth/firebase -->
+      <div class="endpoint-card" id="ep-firebase">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/auth/firebase</div>
+            <div class="endpoint-desc">Sync or create a user account via Firebase ID token (Google/Social login)</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span><span class="badge badge-rate">RATE LIMITED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"firebase_token"</span>: <span class="token-str">"eyJhbGciOiJSUzI1NiIsImtpZ..."</span>  <span class="token-comment">// Firebase ID token from client SDK</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Firebase sync successful"</span>,
+  <span class="token-key">"data"</span>: {
+    <span class="token-key">"token"</span>: <span class="token-str">"8|xKabcDef..."</span>,
+    <span class="token-key">"user"</span>: { <span class="token-comment">/* user object */</span> }
+  }
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /photographers -->
+      <div class="endpoint-card" id="ep-photographers">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/photographers</div>
+            <div class="endpoint-desc">List all photographer profiles publicly</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: [
+    {
+      <span class="token-key">"id"</span>: <span class="token-num">2</span>,
+      <span class="token-key">"name"</span>: <span class="token-str">"John Vision"</span>,
+      <span class="token-key">"avatar"</span>: <span class="token-null">null</span>,
+      <span class="token-key">"cover_photo"</span>: <span class="token-null">null</span>,
+      <span class="token-key">"bio"</span>: <span class="token-str">"Capturing your special moments with a cinematic touch."</span>,
+      <span class="token-key">"specialty"</span>: <span class="token-str">"Wedding &amp; Events"</span>,
+      <span class="token-key">"location"</span>: <span class="token-str">"New York, NY"</span>,
+      <span class="token-key">"price_range"</span>: <span class="token-str">"$$$"</span>
+    }
+  ]
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /photographers/{id} -->
+      <div class="endpoint-card" id="ep-photographer-show">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/photographers/<span class="path-param">{id}</span></div>
+            <div class="endpoint-desc">Get a single photographer's public profile</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="info-box">Returns <strong>404</strong> if the user does not exist or is not a photographer.</div>
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: {
+    <span class="token-key">"id"</span>: <span class="token-num">2</span>,
+    <span class="token-key">"name"</span>: <span class="token-str">"John Vision"</span>,
+    <span class="token-comment">// ... full photographer profile</span>
+  }
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /posts public -->
+      <div class="endpoint-card" id="ep-posts-public">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/posts</div>
+            <div class="endpoint-desc">Public social feed — list all posts</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* array of post objects */</span> ]
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /gallery -->
+      <div class="endpoint-card" id="ep-gallery-pub">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/gallery</div>
+            <div class="endpoint-desc">Public gallery listing</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* gallery items */</span> ]
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /albums -->
+      <div class="endpoint-card" id="ep-albums-pub">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/albums</div>
+            <div class="endpoint-desc">Public album listing</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* album objects */</span> ]
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /images -->
+      <div class="endpoint-card" id="ep-images-pub">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/images</div>
+            <div class="endpoint-desc">Public image listing</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* image objects */</span> ]
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /search/location -->
+      <div class="endpoint-card" id="ep-search-loc">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/search/location</div>
+            <div class="endpoint-desc">Search photographers by location address</div>
+            <div class="endpoint-badges"><span class="badge badge-public">PUBLIC</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="info-box warn">
+            <strong>Important:</strong> Use the query parameter <code>?address=</code> — not <code>?query=</code>. The address parameter is required.
+          </div>
+          <div class="code-label">Query Parameters</div>
+          <table class="params-table">
+            <thead><tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr></thead>
+            <tbody>
+              <tr>
+                <td class="param-name">address</td>
+                <td class="param-type">string</td>
+                <td><span class="required">REQUIRED</span></td>
+                <td class="param-desc">Location to search (e.g. "New York")</td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="code-label">Example Request</div>
+          <div class="code-block">GET /api/search/location?<span class="token-key">address</span>=<span class="token-str">New York</span></div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* matching photographer profiles */</span> ]
+}</div>
+          <div class="code-label" style="margin-top:16px">Error — 400 Missing Parameter</div>
+          <div class="code-block">{ <span class="token-key">"error"</span>: <span class="token-str">"Address required"</span> }</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  PROTECTED — AUTH / PROFILE                                      -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🙍</span> Auth &amp; Profile</div>
+      <p class="section-desc">Manage the authenticated user's session and profile. All endpoints require a valid Bearer token.</p>
+
+      <!-- GET /profile -->
+      <div class="endpoint-card" id="ep-profile">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/profile</div>
+            <div class="endpoint-desc">Get the authenticated user's profile</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Success"</span>,
+  <span class="token-key">"data"</span>: {
+    <span class="token-key">"id"</span>: <span class="token-num">7</span>,
+    <span class="token-key">"name"</span>: <span class="token-str">"Test Admin"</span>,
+    <span class="token-key">"email"</span>: <span class="token-str">"admin@lenslink.test"</span>,
+    <span class="token-key">"role_id"</span>: <span class="token-num">1</span>,
+    <span class="token-key">"avatar"</span>: <span class="token-null">null</span>,
+    <span class="token-key">"bio"</span>: <span class="token-null">null</span>,
+    <span class="token-key">"specialty"</span>: <span class="token-null">null</span>,
+    <span class="token-key">"location"</span>: <span class="token-null">null</span>,
+    <span class="token-key">"price_range"</span>: <span class="token-null">null</span>,
+    <span class="token-key">"cover_photo"</span>: <span class="token-null">null</span>
+  }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /profile/update -->
+      <div class="endpoint-card" id="ep-profile-update">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/profile/update</div>
+            <div class="endpoint-desc">Update authenticated user's profile fields</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body (all fields optional)</div>
+          <div class="code-block">{
+  <span class="token-key">"name"</span>: <span class="token-str">"Updated Name"</span>,
+  <span class="token-key">"bio"</span>: <span class="token-str">"Professional photographer"</span>,
+  <span class="token-key">"specialty"</span>: <span class="token-str">"Wedding"</span>,
+  <span class="token-key">"location"</span>: <span class="token-str">"New York, NY"</span>,
+  <span class="token-key">"price_range"</span>: <span class="token-str">"$$$"</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Profile updated successfully"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* updated user object */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /logout -->
+      <div class="endpoint-card" id="ep-logout">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/logout</div>
+            <div class="endpoint-desc">Revoke the current Bearer token</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Logged out successfully"</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  SOCIAL FEED                                                     -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">📰</span> Social Feed</div>
+      <p class="section-desc">Create posts, delete your own posts, and interact with others' posts via likes and comments.</p>
+
+      <!-- POST /posts -->
+      <div class="endpoint-card" id="ep-posts-store">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/posts</div>
+            <div class="endpoint-desc">Create a new post</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"caption"</span>: <span class="token-str">"Golden hour session in NYC"</span>,  <span class="token-comment">// optional</span>
+  <span class="token-key">"image_url"</span>: <span class="token-str">"https://cdn.lenslink.com/p1.jpg"</span>  <span class="token-comment">// optional</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Post created"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* newly created post */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- DELETE /posts/{id} -->
+      <div class="endpoint-card" id="ep-post-delete">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-DELETE">DEL</span>
+          <div>
+            <div class="endpoint-path">/api/posts/<span class="path-param">{id}</span></div>
+            <div class="endpoint-desc">Delete a post (owner only)</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="info-box">Returns <strong>403</strong> if the authenticated user is not the post owner.</div>
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Post deleted"</span>
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /posts/{id}/like -->
+      <div class="endpoint-card" id="ep-post-like">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/posts/<span class="path-param">{id}</span>/like</div>
+            <div class="endpoint-desc">Toggle like on a post (like if not liked, unlike if already liked)</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Post liked"</span>   <span class="token-comment">// or "Post unliked"</span>
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /posts/{id}/comment -->
+      <div class="endpoint-card" id="ep-post-comment">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/posts/<span class="path-param">{id}</span>/comment</div>
+            <div class="endpoint-desc">Add a comment to a post</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"body"</span>: <span class="token-str">"Amazing shot!"</span>  <span class="token-comment">// required</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Comment added"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* comment object */</span> }
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  MESSAGING                                                       -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">💬</span> Messaging</div>
+      <p class="section-desc">Direct messaging between users. View your inbox, send messages, and list all conversations.</p>
+
+      <!-- GET /messages -->
+      <div class="endpoint-card" id="ep-messages-get">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/messages</div>
+            <div class="endpoint-desc">List messages for the authenticated user</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* message objects */</span> ]
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /messages -->
+      <div class="endpoint-card" id="ep-messages-post">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/messages</div>
+            <div class="endpoint-desc">Send a direct message to another user</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"receiver_id"</span>: <span class="token-num">2</span>,
+  <span class="token-key">"body"</span>: <span class="token-str">"Hi, I'd like to book a session!"</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Message sent"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* message object */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /conversations -->
+      <div class="endpoint-card" id="ep-conversations">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/conversations</div>
+            <div class="endpoint-desc">List all conversations for the authenticated user</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: [ <span class="token-comment">/* conversation threads with latest message */</span> ]
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  GALLERY & IMAGES                                                -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🖼️</span> Gallery, Albums &amp; Images</div>
+      <p class="section-desc">Photographers can create galleries, organize images into albums, upload new images, and archive them.</p>
+
+      <!-- POST /gallery -->
+      <div class="endpoint-card" id="ep-gallery-store">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/gallery</div>
+            <div class="endpoint-desc">Create a new gallery</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"title"</span>: <span class="token-str">"Wedding Collection 2026"</span>,
+  <span class="token-key">"description"</span>: <span class="token-str">"Spring weddings gallery"</span>  <span class="token-comment">// optional</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Gallery created"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* gallery object */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /albums -->
+      <div class="endpoint-card" id="ep-album-store">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/albums</div>
+            <div class="endpoint-desc">Create a new album inside a gallery</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"gallery_id"</span>: <span class="token-num">1</span>,
+  <span class="token-key">"title"</span>: <span class="token-str">"Ceremony"</span>
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /images/upload -->
+      <div class="endpoint-card" id="ep-images-upload">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/images/upload</div>
+            <div class="endpoint-desc">Upload an image to an album</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="info-box">Send as <code>multipart/form-data</code> for file upload, or pass a URL string.</div>
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"album_id"</span>: <span class="token-num">1</span>,
+  <span class="token-key">"image"</span>: <span class="token-str">"&lt;file&gt;"</span>   <span class="token-comment">// multipart file or URL</span>
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /images/archive -->
+      <div class="endpoint-card" id="ep-images-archive">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/images/archive</div>
+            <div class="endpoint-desc">Archive (soft-delete) an image</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"image_id"</span>: <span class="token-num">5</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Image archived"</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  BOOKINGS & PAYMENTS                                             -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">📅</span> Bookings &amp; Payments</div>
+      <p class="section-desc">Full booking lifecycle — create, view, update status, and process payments. Clients book photographers; photographers confirm bookings.</p>
+
+      <!-- GET /bookings -->
+      <div class="endpoint-card" id="ep-bookings-list">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/bookings</div>
+            <div class="endpoint-desc">List bookings for the authenticated user (as client or photographer)</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: [
+    {
+      <span class="token-key">"id"</span>: <span class="token-num">1</span>,
+      <span class="token-key">"photographer_id"</span>: <span class="token-num">2</span>,
+      <span class="token-key">"client_id"</span>: <span class="token-num">9</span>,
+      <span class="token-key">"status"</span>: <span class="token-str">"pending"</span>,
+      <span class="token-key">"date"</span>: <span class="token-str">"2026-06-15"</span>,
+      <span class="token-key">"amount"</span>: <span class="token-num">500.00</span>
+    }
+  ]
+}</div>
+        </div>
+      </div>
+
+      <!-- GET /bookings/{id} -->
+      <div class="endpoint-card" id="ep-bookings-show">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/bookings/<span class="path-param">{id}</span></div>
+            <div class="endpoint-desc">Get a single booking detail</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="info-box">Returns <strong>403</strong> if the booking does not belong to the authenticated user.</div>
+          <div class="code-label">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* full booking object */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /bookings -->
+      <div class="endpoint-card" id="ep-bookings-store">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/bookings</div>
+            <div class="endpoint-desc">Create a new booking request</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"photographer_id"</span>: <span class="token-num">2</span>,
+  <span class="token-key">"date"</span>: <span class="token-str">"2026-06-15"</span>,
+  <span class="token-key">"notes"</span>: <span class="token-str">"Beach wedding, golden hour preferred"</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 201 Created</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Booking created"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* new booking object */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- PATCH /bookings/{id}/status -->
+      <div class="endpoint-card" id="ep-bookings-status">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-PATCH">PATCH</span>
+          <div>
+            <div class="endpoint-path">/api/bookings/<span class="path-param">{id}</span>/status</div>
+            <div class="endpoint-desc">Update booking status (photographer accepts/declines)</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"accepted"</span>  <span class="token-comment">// "accepted" | "declined" | "completed" | "cancelled"</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Booking status updated"</span>,
+  <span class="token-key">"data"</span>: { <span class="token-comment">/* updated booking */</span> }
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /bookings/{id}/pay -->
+      <div class="endpoint-card" id="ep-bookings-pay">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/bookings/<span class="path-param">{id}</span>/pay</div>
+            <div class="endpoint-desc">Initiate payment for a booking</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"payment_method_id"</span>: <span class="token-str">"pm_card_visa"</span>  <span class="token-comment">// Stripe PaymentMethod ID</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Payment processed"</span>
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /bookings/{id}/confirm -->
+      <div class="endpoint-card" id="ep-bookings-confirm">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/bookings/<span class="path-param">{id}</span>/confirm</div>
+            <div class="endpoint-desc">Confirm payment for a booking</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"payment_intent_id"</span>: <span class="token-str">"pi_3OsABC..."</span>
+}</div>
+        </div>
+      </div>
+
+      <!-- POST /bookings/intent -->
+      <div class="endpoint-card" id="ep-bookings-intent">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-POST">POST</span>
+          <div>
+            <div class="endpoint-path">/api/bookings/intent</div>
+            <div class="endpoint-desc">Create a Stripe PaymentIntent for client-side confirmation</div>
+            <div class="endpoint-badges"><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="code-label">Request Body</div>
+          <div class="code-block">{
+  <span class="token-key">"booking_id"</span>: <span class="token-num">1</span>
+}</div>
+          <div class="code-label" style="margin-top:16px">Success Response — 200 OK</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"client_secret"</span>: <span class="token-str">"pi_3OsABC_secret_..."</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <!--  ADMIN                                                           -->
+    <!-- ════════════════════════════════════════════════════════════════ -->
+    <div class="section">
+      <div class="section-title"><span class="icon">🔧</span> Admin Endpoints</div>
+      <p class="section-desc">Admin-only endpoints protected by both <code>auth:sanctum</code> and <code>role.admin</code> middleware. Non-admin users receive a <strong>403 Forbidden</strong> response.</p>
+
+      <!-- GET /admin-stats -->
+      <div class="endpoint-card" id="ep-admin-stats">
+        <div class="endpoint-header" onclick="toggleEndpoint(this)">
+          <span class="endpoint-method method-GET">GET</span>
+          <div>
+            <div class="endpoint-path">/api/admin-stats</div>
+            <div class="endpoint-desc">Get platform-wide statistics (total users, bookings, posts, etc.)</div>
+            <div class="endpoint-badges"><span class="badge badge-admin">ADMIN ONLY</span><span class="badge badge-auth">AUTH REQUIRED</span></div>
+          </div>
+          <span class="toggle-icon">▼</span>
+        </div>
+        <div class="endpoint-body">
+          <div class="info-box danger">
+            Requires <code>role_id: 1</code>. Accessing with a non-admin token returns <strong>403 Forbidden</strong>.
+          </div>
+          <div class="code-label">Success Response — 200 OK (Admin token)</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"success"</span>,
+  <span class="token-key">"data"</span>: {
+    <span class="token-key">"total_users"</span>: <span class="token-num">9</span>,
+    <span class="token-key">"total_photographers"</span>: <span class="token-num">3</span>,
+    <span class="token-key">"total_clients"</span>: <span class="token-num">5</span>,
+    <span class="token-key">"total_bookings"</span>: <span class="token-num">12</span>,
+    <span class="token-key">"total_posts"</span>: <span class="token-num">24</span>
+  }
+}</div>
+          <div class="code-label" style="margin-top:16px">Error — 403 Forbidden (non-admin)</div>
+          <div class="code-block">{
+  <span class="token-key">"status"</span>: <span class="token-str">"error"</span>,
+  <span class="token-key">"message"</span>: <span class="token-str">"Forbidden. Admin access required."</span>
+}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div style="border-top:1px solid var(--border); padding-top:32px; color:var(--muted); font-size:12px; text-align:center; margin-top:32px;">
+      LensLink API Documentation · Laravel 12 + Sanctum · Generated 2026-05-25 · 62/63 Tests Passed
+    </div>
+
+  </main>
+</div>
+
+<script>
+  function toggleEndpoint(header) {
+    const body = header.nextElementSibling;
+    const icon = header.querySelector('.toggle-icon');
+    const isOpen = body.classList.contains('open');
+    body.classList.toggle('open', !isOpen);
+    icon.classList.toggle('open', !isOpen);
+  }
+
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('[id]');
+  const links = document.querySelectorAll('.sidebar-link');
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'));
+        const active = document.querySelector(`.sidebar-link[href="#${entry.target.id}"]`);
+        if (active) active.classList.add('active');
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

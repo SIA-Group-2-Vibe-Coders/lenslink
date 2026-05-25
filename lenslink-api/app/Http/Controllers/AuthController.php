@@ -2,62 +2,49 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Requests\UpdateProfileRequest;
+use App\Http\Traits\ApiResponse;
 use App\Services\AuthService;
-use Illuminate\Http\Request;
+use App\Services\ExternalAuthService;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
-    protected $authService;
-    protected $externalAuthService;
+    use ApiResponse;
 
-    public function __construct(AuthService $authService, \App\Services\ExternalAuthService $externalAuthService)
-    {
-        $this->authService = $authService;
-        $this->externalAuthService = $externalAuthService;
-    }
+    public function __construct(
+        protected AuthService $authService,
+        protected ExternalAuthService $externalAuthService
+    ) {}
 
     /**
      * POST /register
      */
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $request->validate([
-            'full_name' => 'required|string|max:255',
-            'email'     => 'required|string|email|unique:users,email',
-            'password'  => 'required|string|min:6',
-            'role_id'   => 'required|integer|exists:roles,id'
-        ]);
-
-        $user = $this->authService->register($request->all());
+        $user  = $this->authService->register($request->validated());
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Registration successful',
-            'token'   => $token,
-            'data'    => $user
-        ], 201);
+        return $this->createdResponse([
+            'token' => $token,
+            'user'  => $user,
+        ], 'Registration successful');
     }
 
     /**
      * POST /login
      */
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email'    => 'required|email',
-            'password' => 'required'
-        ]);
+        $authData = $this->authService->login($request->validated());
 
-        $authData = $this->authService->login($request->only('email', 'password'));
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Login successful',
-            'token'   => $authData['token'],
-            'data'    => $authData['user']
-        ]);
+        return $this->successResponse([
+            'token' => $authData['token'],
+            'user'  => $authData['user'],
+        ], 'Login successful');
     }
 
     /**
@@ -65,10 +52,7 @@ class AuthController extends Controller
      */
     public function profile(Request $request)
     {
-        return response()->json([
-            'status' => 'success',
-            'data'   => $request->user()
-        ]);
+        return $this->successResponse($request->user());
     }
 
     /**
@@ -78,36 +62,21 @@ class AuthController extends Controller
     {
         $this->authService->logout($request->user());
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Logged out successfully'
-        ]);
+        return $this->successResponse(null, 'Logged out successfully');
     }
 
     /**
      * POST /profile/update
      */
-    public function updateProfile(Request $request)
+    public function updateProfile(UpdateProfileRequest $request)
     {
         $user = $request->user();
-
-        $request->validate([
-            'name' => 'nullable|string|max:255',
-            'bio' => 'nullable|string|max:1000',
-            'specialty' => 'nullable|string|max:255',
-            'location' => 'nullable|string|max:255',
-            'price_range' => 'nullable|string|max:255',
-            'avatar' => 'nullable|image|max:5120',
-            'cover_photo' => 'nullable|image|max:10240',
-        ]);
-
-        $data = $request->only('name', 'bio', 'specialty', 'location', 'price_range');
+        $data = $request->validated();
 
         // Handle Avatar Upload
         if ($request->hasFile('avatar')) {
-            $avatarFile = $request->file('avatar');
-            $uploadResult = Cloudinary::uploadApi()->upload($avatarFile->getRealPath(), [
-                'folder' => 'lenslink/avatars',
+            $uploadResult    = Cloudinary::uploadApi()->upload($request->file('avatar')->getRealPath(), [
+                'folder'        => 'lenslink/avatars',
                 'resource_type' => 'image',
             ]);
             $data['avatar'] = $uploadResult['secure_url'];
@@ -115,9 +84,8 @@ class AuthController extends Controller
 
         // Handle Cover Photo Upload
         if ($request->hasFile('cover_photo')) {
-            $coverFile = $request->file('cover_photo');
-            $uploadResult = Cloudinary::uploadApi()->upload($coverFile->getRealPath(), [
-                'folder' => 'lenslink/covers',
+            $uploadResult       = Cloudinary::uploadApi()->upload($request->file('cover_photo')->getRealPath(), [
+                'folder'        => 'lenslink/covers',
                 'resource_type' => 'image',
             ]);
             $data['cover_photo'] = $uploadResult['secure_url'];
@@ -125,30 +93,24 @@ class AuthController extends Controller
 
         $user->update($data);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Profile updated successfully',
-            'data' => $user
-        ]);
+        return $this->successResponse($user->fresh(), 'Profile updated successfully');
     }
 
     /**
-     * POST /api/auth/firebase
-     * Sync and login with a Firebase token.
+     * POST /auth/firebase
+     * Sync and login with a Firebase ID token.
      */
     public function firebaseSync(Request $request)
     {
-        $request->validate(['id_token' => 'required']);
+        $request->validate(['id_token' => 'required|string']);
 
-        $user = $this->externalAuthService->authenticateWithFirebase($request->id_token);
+        $user  = $this->externalAuthService->authenticateWithFirebase($request->id_token);
         $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()->json([
-            'status' => 'success',
-            'token' => $token,
+        return $this->successResponse([
+            'token'        => $token,
             'access_token' => $token,
-            'user' => $user,
-        ]);
+            'user'         => $user,
+        ], 'Firebase authentication successful');
     }
 }
-

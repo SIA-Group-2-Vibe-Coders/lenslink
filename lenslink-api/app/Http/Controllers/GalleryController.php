@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAlbumRequest;
+use App\Http\Requests\StoreGalleryRequest;
+use App\Http\Traits\ApiResponse;
+use App\Models\Gallery;
 use App\Services\GalleryService;
 use Illuminate\Http\Request;
 
 class GalleryController extends Controller
 {
-    protected $galleryService;
+    use ApiResponse;
 
-    public function __construct(GalleryService $galleryService)
-    {
-        $this->galleryService = $galleryService;
-    }
+    public function __construct(protected GalleryService $galleryService) {}
 
     /**
      * GET /gallery
@@ -20,67 +21,39 @@ class GalleryController extends Controller
     public function galleries(Request $request)
     {
         $photographerId = $request->query('photographer_id');
-        $galleries = $this->galleryService->getAllGalleries($photographerId ? (int)$photographerId : null);
+        $galleries      = $this->galleryService->getAllGalleries($photographerId ? (int) $photographerId : null);
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => $galleries
-        ]);
+        return $this->successResponse($galleries);
     }
 
     /**
      * POST /gallery
      */
-    public function storeGallery(Request $request)
+    public function storeGallery(StoreGalleryRequest $request)
     {
-        $request->validate([
-            'title'       => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'is_public'   => 'nullable',
-            'cover_image' => 'nullable|image|mimes:jpeg,png,webp|max:5120',
-            'client_id'   => 'nullable|exists:users,id',
-        ]);
-
-        $photographer = $request->user();
-
         $gallery = $this->galleryService->createGallery(
-            $request->all(),
-            $photographer->id
+            $request->validated(),
+            $request->user()->id
         );
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Gallery created successfully',
-            'data'    => $gallery
-        ], 201);
+        return $this->createdResponse($gallery, 'Gallery created successfully');
     }
 
     /**
      * POST /albums
      */
-    public function storeAlbum(Request $request)
+    public function storeAlbum(StoreAlbumRequest $request)
     {
-        $request->validate([
-            'title'      => 'required|string|max:255',
-            'gallery_id' => 'required|exists:galleries,id',
-        ]);
-
         // Ensure the gallery belongs to the logged-in photographer
-        $gallery = \App\Models\Gallery::findOrFail($request->gallery_id);
+        $gallery = Gallery::findOrFail($request->validated('gallery_id'));
+
         if ($gallery->photographer_id !== $request->user()->id) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Unauthorized to add albums to this gallery'
-            ], 403);
+            return $this->forbiddenResponse('You are not authorized to add albums to this gallery.');
         }
 
-        $album = $this->galleryService->createAlbum($request->all());
+        $album = $this->galleryService->createAlbum($request->validated());
 
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'Album created successfully',
-            'data'    => $album
-        ], 201);
+        return $this->createdResponse($album, 'Album created successfully');
     }
 
     /**
@@ -88,16 +61,13 @@ class GalleryController extends Controller
      */
     public function albums(Request $request)
     {
-        $request->validate([
-            'gallery_id' => 'nullable|exists:galleries,id'
-        ]);
+        $request->validate(['gallery_id' => 'nullable|integer|exists:galleries,id']);
 
-        $albums = $this->galleryService->getAlbumsByGallery($request->gallery_id ? (int)$request->gallery_id : null);
+        $albums = $this->galleryService->getAlbumsByGallery(
+            $request->gallery_id ? (int) $request->gallery_id : null
+        );
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => $albums
-        ]);
+        return $this->successResponse($albums);
     }
 
     /**
@@ -105,16 +75,12 @@ class GalleryController extends Controller
      */
     public function images(Request $request)
     {
-        $request->validate([
-            'album_id' => 'nullable|exists:albums,id'
-        ]);
+        $request->validate(['album_id' => 'nullable|integer|exists:albums,id']);
 
-        $images = $this->galleryService->getImagesByAlbum($request->album_id ? (int)$request->album_id : null);
+        $images = $this->galleryService->getImagesByAlbum(
+            $request->album_id ? (int) $request->album_id : null
+        );
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => $images
-        ]);
+        return $this->successResponse($images);
     }
 }
-

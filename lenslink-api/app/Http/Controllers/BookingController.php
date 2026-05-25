@@ -2,258 +2,204 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
+use App\Http\Requests\StoreBookingRequest;
+use App\Http\Requests\UpdateBookingStatusRequest;
+use App\Http\Traits\ApiResponse;
+use App\Repositories\BookingRepository;
 use App\Services\PaymentService;
 use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    protected $paymentService;
+    use ApiResponse;
 
-    public function __construct(PaymentService $paymentService)
-    {
-        $this->paymentService = $paymentService;
-    }
+    public function __construct(
+        protected PaymentService $paymentService,
+        protected BookingRepository $bookingRepository
+    ) {}
 
     /**
-     * Get bookings associated with the current user.
+     * GET /bookings
+     * Get all bookings for the current user (as client or photographer).
      */
     public function index(Request $request)
     {
-        $user = $request->user();
+        $bookings = $this->bookingRepository->getForUser($request->user());
 
-        // Get bookings where current user is either client OR photographer
-        $bookings = Booking::with(['client:id,name,avatar,email', 'photographer:id,name,avatar,email'])
-            ->where('client_id', $user->id)
-            ->orWhere('photographer_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $bookings
-        ]);
+        return $this->successResponse($bookings);
     }
 
     /**
+     * GET /bookings/{id}
+     * Get a single booking — only visible to client or photographer of that booking.
+     */
+    public function show(Request $request, int $id)
+    {
+        $booking = $this->bookingRepository->findWithRelations($id);
+
+        if ($request->user()->cannot('view', $booking)) {
+            return $this->forbiddenResponse('You are not authorized to view this booking.');
+        }
+
+        return $this->successResponse($booking);
+    }
+
+    /**
+     * POST /bookings
      * Create a new booking request.
      */
-    public function store(Request $request)
+    public function store(StoreBookingRequest $request)
     {
-        $request->validate([
-            'photographer_id' => 'required|exists:users,id',
-            'session_date' => 'required|date',
-            'amount' => 'required|numeric|min:1',
-            'notes' => 'nullable|string',
-        ]);
-
         $client = $request->user();
 
-        if ($client->id == $request->photographer_id) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You cannot book a session with yourself.'
-            ], 400);
+        if ($client->id == $request->validated('photographer_id')) {
+            return $this->errorResponse('You cannot book a session with yourself.', 400);
         }
 
-        $booking = Booking::create([
-            'client_id' => $client->id,
-            'photographer_id' => $request->photographer_id,
-            'session_date' => $request->session_date,
-            'amount' => $request->amount,
-            'status' => 'pending',
-            'notes' => $request->notes,
+        $booking = $this->bookingRepository->create([
+            'client_id'       => $client->id,
+            'photographer_id' => $request->validated('photographer_id'),
+            'session_date'    => $request->validated('session_date'),
+            'amount'          => $request->validated('amount'),
+            'status'          => 'pending',
+            'notes'           => $request->validated('notes'),
         ]);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Booking request submitted successfully',
-            'data' => $booking->load(['client:id,name,avatar', 'photographer:id,name,avatar'])
-        ]);
+        return $this->createdResponse(
+            $booking->load(['client:id,name,avatar', 'photographer:id,name,avatar']),
+            'Booking request submitted successfully'
+        );
     }
 
     /**
-     * Update the status of a booking.
+     * PATCH /bookings/{id}/status
+     * Update the status of a booking (photographer: accept/decline/complete; either party: cancel).
      */
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(UpdateBookingStatusRequest $request, int $id)
     {
-        $request->validate([
-            'status' => 'required|in:accepted,declined,completed,cancelled',
-        ]);
+        $booking = $this->bookingRepository->findWithRelations($id);
+        $user    = $request->user();
+        $status  = $request->validated('status');
 
-        $booking = Booking::findOrFail($id);
-        $user = $request->user();
-
-        // Check authorization:
-        // Photographer can accept, decline, complete
-        // Client or Photographer can cancel
-        if (in_array($request->status, ['accepted', 'declined', 'completed'])) {
-            if ($booking->photographer_id !== $user->id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Only the photographer can accept, decline, or complete this booking.'
-                ], 403);
+        // Photographer-only actions
+        if (in_array($status, ['accepted', 'declined', 'completed'])) {
+            if ($user->cannot('updateStatus', $booking)) {
+                return $this->forbiddenResponse('Only the photographer can accept, decline, or complete this booking.');
             }
         }
 
-        if ($request->status === 'cancelled') {
-            if ($booking->client_id !== $user->id && $booking->photographer_id !== $user->id) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Unauthorized to cancel this booking.'
-                ], 403);
-            }
+        // Cancel: either party can cancel
+        if ($status === 'cancelled' && $user->cannot('cancel', $booking)) {
+            return $this->forbiddenResponse('You are not authorized to cancel this booking.');
         }
 
-        $booking->update([
-            'status' => $request->status,
-        ]);
+        $updated = $this->bookingRepository->updateStatus($booking, $status);
 
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Booking status updated successfully',
-            'data' => $booking->load(['client:id,name,avatar', 'photographer:id,name,avatar'])
-        ]);
+        return $this->successResponse($updated, 'Booking status updated successfully');
     }
 
     /**
-     * POST /api/bookings/{id}/pay
-     * Create a Stripe Payment Intent specifically for this booking.
+     * POST /bookings/{id}/pay
+     * Create a Stripe Payment Intent for a specific booking.
      */
-    public function pay(Request $request, $id)
+    public function pay(Request $request, int $id)
     {
-        $booking = Booking::findOrFail($id);
-        $user = $request->user();
+        $booking = $this->bookingRepository->findWithRelations($id);
+        $user    = $request->user();
 
-        if ($booking->client_id !== $user->id) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Only the client who booked this session can pay for it.'
-            ], 403);
+        if ($user->cannot('pay', $booking)) {
+            return $this->forbiddenResponse('Only the client who booked this session can pay for it.');
         }
 
         if (!in_array($booking->status, ['pending', 'accepted'])) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You can only pay for pending or accepted bookings. Current status: ' . $booking->status
-            ], 400);
+            return $this->errorResponse(
+                'You can only pay for pending or accepted bookings. Current status: ' . $booking->status,
+                400
+            );
         }
 
         try {
-            // Generate payment intent
             $intent = $this->paymentService->createPaymentIntent(
                 (int) $booking->amount,
                 'usd',
                 [
-                    'booking_id' => $booking->id,
+                    'booking_id'      => $booking->id,
                     'photographer_id' => $booking->photographer_id,
-                    'client_id' => $booking->client_id
+                    'client_id'       => $booking->client_id,
                 ]
             );
 
             return response()->json([
-                'status' => 'success',
+                'status'        => 'success',
                 'client_secret' => $intent->client_secret,
-                'is_mock' => false
+                'is_mock'       => false,
             ]);
         } catch (\Exception $e) {
-            // Handle Stripe key/network issue by falling back gracefully to mock mode
+            // Graceful fallback to mock mode when Stripe is unavailable
             return response()->json([
-                'status' => 'success',
+                'status'        => 'success',
                 'client_secret' => 'mock_secret_booking_' . $booking->id,
-                'is_mock' => true,
-                'message' => 'Stripe integration offline or unavailable. Graceful simulated payment mode initiated.',
-                'error_hint' => $e->getMessage()
+                'is_mock'       => true,
+                'message'       => 'Stripe integration offline. Simulated payment mode active.',
+                'error_hint'    => $e->getMessage(),
             ]);
         }
     }
 
     /**
-     * POST /api/bookings/{id}/confirm
-     * Confirm that Stripe payment has been completed and update status.
+     * POST /bookings/{id}/confirm
+     * Confirm that Stripe payment completed and update booking to paid.
      */
-    public function confirmPayment(Request $request, $id)
+    public function confirmPayment(Request $request, int $id)
     {
-        $request->validate([
-            'payment_intent_id' => 'required|string',
-        ]);
+        $request->validate(['payment_intent_id' => 'required|string']);
 
-        $booking = Booking::findOrFail($id);
-        $user = $request->user();
+        $booking = $this->bookingRepository->findWithRelations($id);
+        $user    = $request->user();
 
-        if ($booking->client_id !== $user->id) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized to confirm payment for this booking.'
-            ], 403);
+        if ($user->cannot('confirmPayment', $booking)) {
+            return $this->forbiddenResponse('Unauthorized to confirm payment for this booking.');
         }
 
-        // Check for mock payment intent first for simulated/fallback checkout
+        // Handle simulated mock payment
         if (str_starts_with($request->payment_intent_id, 'mock_')) {
-            $booking->update([
-                'status' => 'paid',
-                'stripe_payment_id' => $request->payment_intent_id
-            ]);
+            $updated = $this->bookingRepository->markPaid($booking, $request->payment_intent_id);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Simulated payment completed successfully. Booking marked as paid (Mock Bypass Mode).',
-                'data' => $booking->load(['client:id,name,avatar', 'photographer:id,name,avatar'])
-            ]);
+            return $this->successResponse($updated, 'Simulated payment completed. Booking marked as paid (Mock Mode).');
         }
 
-        // Verify the payment state with Stripe
+        // Verify with Stripe
         try {
             $intent = $this->paymentService->verifyPayment($request->payment_intent_id);
 
             if ($intent->status === 'succeeded') {
-                $booking->update([
-                    'status' => 'paid',
-                    'stripe_payment_id' => $request->payment_intent_id
-                ]);
+                $updated = $this->bookingRepository->markPaid($booking, $request->payment_intent_id);
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Payment confirmed successfully. Booking is now paid.',
-                    'data' => $booking->load(['client:id,name,avatar', 'photographer:id,name,avatar'])
-                ]);
-            } else {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Payment has not succeeded. Current status: ' . $intent->status
-                ], 400);
+                return $this->successResponse($updated, 'Payment confirmed. Booking is now paid.');
             }
+
+            return $this->errorResponse('Payment has not succeeded. Current status: ' . $intent->status, 400);
         } catch (\Exception $e) {
-            // If verification fails but we want robust user experience, allow mock recovery
-            if ($request->has('force_mock') && $request->force_mock) {
-                $booking->update([
-                    'status' => 'paid',
-                    'stripe_payment_id' => 'mock_recovered_' . time()
-                ]);
+            // Allow manual fallback recovery
+            if ($request->boolean('force_mock')) {
+                $updated = $this->bookingRepository->markPaid($booking, 'mock_recovered_' . time());
 
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'Stripe verification failed but payment recovered via simulated fallback mode.',
-                    'data' => $booking->load(['client:id,name,avatar', 'photographer:id,name,avatar'])
-                ]);
+                return $this->successResponse($updated, 'Payment recovered via simulated fallback.');
             }
 
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Failed to verify payment: ' . $e->getMessage()
-            ], 500);
+            return $this->errorResponse('Failed to verify payment: ' . $e->getMessage(), 500);
         }
     }
 
     /**
-     * POST /api/bookings/intent
-     * Legacy/stateless payment intent creation.
+     * POST /bookings/intent
+     * Legacy stateless payment intent (without a pre-existing booking).
      */
     public function createIntent(Request $request)
     {
         $request->validate([
-            'amount' => 'required|numeric|min:1',
-            'photographer_id' => 'required|exists:users,id'
+            'amount'          => 'required|numeric|min:1',
+            'photographer_id' => 'required|integer|exists:users,id',
         ]);
 
         try {
@@ -262,50 +208,23 @@ class BookingController extends Controller
                 'usd',
                 [
                     'photographer_id' => $request->photographer_id,
-                    'client_id' => $request->user()->id
+                    'client_id'       => $request->user()->id,
                 ]
             );
 
             return response()->json([
-                'status' => 'success',
+                'status'        => 'success',
                 'client_secret' => $intent->client_secret,
-                'is_mock' => false
+                'is_mock'       => false,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'status' => 'success',
+                'status'        => 'success',
                 'client_secret' => 'mock_secret_stateless_' . time(),
-                'is_mock' => true,
-                'message' => 'Stripe integration offline or unavailable. Graceful simulated payment mode initiated.',
-                'error_hint' => $e->getMessage()
+                'is_mock'       => true,
+                'message'       => 'Stripe integration offline. Simulated payment mode active.',
+                'error_hint'    => $e->getMessage(),
             ]);
         }
-    }
-
-    /**
-     * GET /api/bookings/{id}
-     * Get a single booking by ID.
-     */
-    public function show(Request $request, $id)
-    {
-        $booking = Booking::with([
-            'client:id,name,avatar,email', 
-            'photographer:id,name,avatar,email,specialty,location,price_range'
-        ])->findOrFail($id);
-
-        $user = $request->user();
-
-        // Authorize: only client or photographer of the booking can view it
-        if ($booking->client_id !== $user->id && $booking->photographer_id !== $user->id) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Unauthorized to view this booking.'
-            ], 403);
-        }
-
-        return response()->json([
-            'status' => 'success',
-            'data' => $booking
-        ]);
     }
 }

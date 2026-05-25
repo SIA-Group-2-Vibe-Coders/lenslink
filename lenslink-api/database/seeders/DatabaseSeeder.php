@@ -17,8 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         // Seed default roles
         \DB::table('roles')->insertOrIgnore([
-            ['id' => 1, 'role_name' => 'Admin', 'created_at' => now(), 'updated_at' => now()],
-            ['id' => 2, 'role_name' => 'Photographer', 'created_at' => now(), 'updated_at' => now()],
+            ['id' => 1, 'role_name' => 'Admin',        'created_at' => now(), 'updated_at' => now()],
+            ['id' => 2, 'role_name' => 'Photographer',  'created_at' => now(), 'updated_at' => now()],
+            ['id' => 3, 'role_name' => 'Client',        'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // Create a default admin if not exists

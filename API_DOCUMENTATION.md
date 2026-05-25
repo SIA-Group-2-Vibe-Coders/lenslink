@@ -3,7 +3,7 @@
 > **Base URL (Production):** `https://lenslink-api-3w31.onrender.com/api`
 > **Base URL (Local):** `http://127.0.0.1:8000/api`
 > **Last tested:** 2026-05-19 — ✅ All 33 endpoints passing
-
+ 
 ---
 
 ## Table of Contents

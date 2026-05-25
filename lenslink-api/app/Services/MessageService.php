@@ -4,34 +4,27 @@ namespace App\Services;
 
 use App\Events\MessageSent;
 use App\Models\Gallery;
-use App\Models\Message;
 use App\Models\User;
+use App\Repositories\MessageRepository;
 use Illuminate\Support\Collection;
 
 class MessageService
 {
+    public function __construct(protected MessageRepository $messageRepository) {}
+
     /**
      * Fetch message history between users or for a gallery.
      */
     public function getHistory(User $user, ?int $galleryId, ?int $receiverId): Collection
     {
-        $query = Message::with('sender:id,name,role_id');
-
         if ($galleryId) {
             $this->authorizeGalleryAccess($user, $galleryId);
-            $query->where('gallery_id', $galleryId);
+            $messages = $this->messageRepository->getByGallery($galleryId);
+            $this->messageRepository->markGalleryAsRead($user->id, $galleryId);
         } else {
-            $authId = $user->id;
-            $query->where(function($q) use ($authId, $receiverId) {
-                $q->where('sender_id', $authId)->where('receiver_id', $receiverId)
-                  ->orWhere('sender_id', $receiverId)->where('receiver_id', $authId);
-            });
+            $messages = $this->messageRepository->getDirectHistory($user->id, $receiverId);
+            $this->messageRepository->markDirectAsRead($user->id, $receiverId);
         }
-
-        $messages = $query->orderBy('created_at', 'asc')->get();
-
-        // Mark messages as read
-        $this->markAsRead($user, $galleryId, $receiverId);
 
         return $messages;
     }
@@ -39,13 +32,13 @@ class MessageService
     /**
      * Send a new message.
      */
-    public function sendMessage(User $sender, array $data): Message
+    public function sendMessage(User $sender, array $data): \App\Models\Message
     {
-        if (isset($data['gallery_id']) && $data['gallery_id']) {
-            $this->authorizeGalleryAccess($sender, $data['gallery_id']);
+        if (!empty($data['gallery_id'])) {
+            $this->authorizeGalleryAccess($sender, (int) $data['gallery_id']);
         }
 
-        $message = Message::create([
+        $message = $this->messageRepository->create([
             'gallery_id'  => $data['gallery_id'] ?? null,
             'receiver_id' => $data['receiver_id'] ?? null,
             'sender_id'   => $sender->id,
@@ -54,69 +47,44 @@ class MessageService
 
         broadcast(new MessageSent($message))->toOthers();
 
-        return $message->load('sender:id,name,role_id');
+        return $message;
     }
 
     /**
-     * Get list of conversations for a user.
+     * Get list of conversations (contacts) for a user.
      */
     public function getConversations(User $user): Collection
     {
-        $userId = $user->id;
-
-        $sentTo = Message::where('sender_id', $userId)
-            ->whereNotNull('receiver_id')
-            ->pluck('receiver_id');
-            
-        $receivedFrom = Message::where('receiver_id', $userId)
-            ->pluck('sender_id');
-
-        $contactIds = $sentTo->merge($receivedFrom)->unique();
+        $contactIds = $this->messageRepository->getContactIds($user->id);
 
         return User::whereIn('id', $contactIds)
             ->select('id', 'name', 'avatar', 'specialty')
             ->get()
-            ->map(function($contact) use ($userId) {
-                $lastMsg = Message::where(function($q) use ($userId, $contact) {
-                    $q->where('sender_id', $userId)->where('receiver_id', $contact->id)
-                      ->orWhere('sender_id', $contact->id)->where('receiver_id', $userId);
-                })->latest()->first();
+            ->map(function ($contact) use ($user) {
+                $lastMsg = $this->messageRepository->getLastDirectMessage($user->id, $contact->id);
 
-                $contact->last_message = $lastMsg ? $lastMsg->body : '';
-                $contact->last_message_at = $lastMsg ? $lastMsg->created_at : null;
-                $contact->unread_count = Message::where('sender_id', $contact->id)
-                    ->where('receiver_id', $userId)
-                    ->whereNull('read_at')
-                    ->count();
+                $contact->last_message    = $lastMsg?->body ?? '';
+                $contact->last_message_at = $lastMsg?->created_at;
+                $contact->unread_count    = $this->messageRepository->countUnread($contact->id, $user->id);
 
                 return $contact;
-            })->sortByDesc('last_message_at')->values();
+            })
+            ->sortByDesc('last_message_at')
+            ->values();
     }
 
     /**
-     * Mark messages as read.
-     */
-    public function markAsRead(User $user, ?int $galleryId, ?int $receiverId): void
-    {
-        $readUpdate = Message::where('sender_id', '!=', $user->id)
-            ->whereNull('read_at');
-        
-        if ($galleryId) {
-            $readUpdate->where('gallery_id', $galleryId);
-        } else {
-            $readUpdate->where('sender_id', $receiverId)->where('receiver_id', $user->id);
-        }
-        
-        $readUpdate->update(['read_at' => now()]);
-    }
-
-    /**
-     * Check if user owns the gallery (for photographers).
+     * Check if user is authorized to access a gallery's messages.
      */
     private function authorizeGalleryAccess(User $user, int $galleryId): void
     {
         $gallery = Gallery::findOrFail($galleryId);
-        if ($user->role_id != 1 && $gallery->photographer_id !== $user->id && $gallery->client_id !== $user->id) {
+
+        if (
+            $user->role_id != 1 &&
+            $gallery->photographer_id !== $user->id &&
+            $gallery->client_id !== $user->id
+        ) {
             abort(403, 'Unauthorized access to this gallery.');
         }
     }

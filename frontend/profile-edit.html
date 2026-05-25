@@ -7,6 +7,15 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- ⚡ Synchronous Auth Guard — runs before body renders to prevent flash -->
+    <script>
+        (function () {
+            try {
+                var token = localStorage.getItem('auth_token');
+                if (!token) { window.location.replace('login.html'); }
+            } catch (e) { window.location.replace('login.html'); }
+        })();
+    </script>
 </head>
 <body class="bg-zinc-950 text-zinc-200 font-sans antialiased min-h-screen flex flex-col">
     

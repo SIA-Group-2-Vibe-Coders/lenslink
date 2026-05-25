@@ -79,22 +79,13 @@
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <!-- Firebase config (see assets/js/firebase-config.js for domain restriction instructions) -->
+    <script src="assets/js/firebase-config.js"></script>
 
     <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAZcQZK_9sWrz8L7XVU-qra_bNfY86dKXc",
-            authDomain: "lenslink-43561.firebaseapp.com",
-            projectId: "lenslink-43561",
-            storageBucket: "lenslink-43561.firebasestorage.app",
-            messagingSenderId: "859298338221",
-            appId: "1:859298338221:web:8f6dcc69e7270bf4997d24",
-            measurementId: "G-R4VZBVRQYT"
-        };
-        
-        // Initialize Firebase
-        if (firebaseConfig.apiKey !== "FIREBASE_API_KEY") {
-            firebase.initializeApp(firebaseConfig);
+        // Initialize Firebase using config from firebase-config.js
+        if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY") {
+            firebase.initializeApp(FIREBASE_CONFIG);
         }
 
         const googleProvider = new firebase.auth.GoogleAuthProvider();

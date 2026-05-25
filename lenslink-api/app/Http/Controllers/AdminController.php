@@ -2,36 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Traits\ApiResponse;
 use App\Services\AdminService;
 use Illuminate\Http\Request;
 
 class AdminController extends Controller
 {
-    protected $adminService;
+    use ApiResponse;
 
-    public function __construct(AdminService $adminService)
-    {
-        $this->adminService = $adminService;
-    }
+    public function __construct(protected AdminService $adminService) {}
 
     /**
      * GET /admin-stats
+     * Returns platform statistics for the admin dashboard.
+     * Authorization is enforced by the `role.admin` middleware — no manual check needed.
      */
     public function stats(Request $request)
     {
-        if ($request->user()->role_id != 1) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Forbidden. Admin access required.'
-            ], 403);
-        }
-
         $stats = $this->adminService->getStats();
 
-        return response()->json([
-            'status' => 'success',
-            'data'   => $stats,
-        ]);
+        return $this->successResponse($stats);
     }
 }
-
