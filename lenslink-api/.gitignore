@@ -1,6 +1,10 @@
 *.log
 .DS_Store
 .env
+
+# Firebase service account credentials — never commit these
+/storage/app/firebase-auth.json
+/storage/app/*.json
 .env.backup
 .env.production
 .phpactor.json

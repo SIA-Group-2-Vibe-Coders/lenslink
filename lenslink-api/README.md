@@ -1,91 +1,164 @@
 # LensLink API
 
-LensLink is a specialized platform for photographers to showcase their work, manage portfolios, and connect with clients. This repository contains the backend API built with Laravel 11.
+LensLink is a platform for photographers to showcase their work, manage portfolios, and connect with clients. This repository contains the backend API built with **Laravel 12** and secured with **Laravel Sanctum**.
+
+---
 
 ## Features
 
-- **User Authentication**: Secure login and registration using Laravel Sanctum.
-- **Role-Based Access**: Specialized roles for Admins, Photographers, and Clients.
-- **Gallery Management**: Organize work into galleries and albums.
-- **Smart Image Processing**: Integrated with Cloudinary for automatic watermarking and thumbnail generation.
-- **Real-time Messaging**: Direct chat between clients and photographers powered by Pusher.
-- **Admin Dashboard**: System-wide statistics and management.
+- **Authentication** — Register/login with Sanctum tokens. Firebase/Google social login sync.
+- **Role-Based Access** — Admin (1), Photographer (2), Client (3).
+- **Gallery Management** — Galleries, albums, and image uploads via Cloudinary.
+- **Social Feed** — Posts, likes, and comments.
+- **Real-time Messaging** — Direct chat powered by Pusher.
+- **Bookings & Payments** — Full booking lifecycle with Stripe PaymentIntent.
+- **Location Search** — Find photographers by city via Google Maps Geocoding.
+- **Admin Dashboard** — Platform-wide statistics.
+
+---
 
 ## Architecture
 
-The project follows a **Service-Layer Architecture** to keep the codebase clean, testable, and maintainable:
-- **Controllers**: Handle HTTP requests and responses.
-- **Services**: Contain the core business logic.
-- **Models**: Define data structure and relationships.
-- **Events**: Handle asynchronous actions like real-time notifications.
+Service-layer architecture for clean separation of concerns:
+
+```
+Controllers  →  Services / Repositories  →  Models
+     ↓
+Form Requests (validation) + Policies (authorization) + Middleware (auth/roles)
+```
+
+| Layer | Path |
+|---|---|
+| Controllers | `app/Http/Controllers/` |
+| Services | `app/Services/` |
+| Repositories | `app/Repositories/` (Booking, Post, Message) |
+| Models | `app/Models/` |
+| Middleware | `app/Http/Middleware/` |
+| Form Requests | `app/Http/Requests/` |
+| Policies | `app/Policies/` |
+| Events | `app/Events/` |
+
+---
 
 ## Tech Stack
 
-- **Framework**: [Laravel 11](https://laravel.com)
-- **Database**: PostgreSQL (Supabase) / SQLite (Local)
-- **Authentication**: Laravel Sanctum
-- **Image Storage**: Cloudinary
-- **Real-time**: Pusher / Laravel Reverb
+| Component | Technology |
+|---|---|
+| Framework | Laravel 12 |
+| Auth | Laravel Sanctum |
+| Database | SQLite (local) / PostgreSQL (production) |
+| Image Storage | Cloudinary |
+| Real-time | Pusher |
+| Payments | Stripe |
+| Location | Google Maps Geocoding API |
+| Social Auth | Firebase Admin SDK |
+
+---
+
+## Roles
+
+| role_id | Name | Access |
+|---|---|---|
+| 1 | Admin | Full access + `/admin-stats` |
+| 2 | Photographer | Gallery, albums, images, bookings |
+| 3 | Client | Browse, book, message, social feed |
+
+---
 
 ## Setup
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repo-url>
-   cd lenslink-api
-   ```
+```bash
+# 1. Install dependencies
+composer install
 
-2. **Install dependencies**:
-   ```bash
-   composer install
-   ```
+# 2. Configure environment
+cp .env.example .env
+php artisan key:generate
 
-3. **Configure Environment**:
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
+# 3. Run migrations and seed default data
+php artisan migrate --seed
 
-4. **Run Migrations & Seeders**:
-   ```bash
-   php artisan migrate --seed
-   ```
+# 4. Start the server
+php artisan serve
+```
 
-5. **Start the server**:
-   ```bash
-   php artisan serve
-   ```
-
-## Core Integrations (Mandatory APIs)
-
-LensLink is integrated with 5 essential third-party services to provide a professional photography experience:
-
-1.  **Cloudinary (Storage & CDN)**: Handles image uploads, automatic watermarking, and responsive image transformations.
-2.  **Pusher (Real-time Messaging)**: Powering the direct chat system with instant message delivery and status updates.
-3.  **Stripe (Payments)**: Secure payment intent creation for booking deposits and professional services.
-4.  **Google Maps (Geocoding)**: Enables "Nearby Photographer" search by converting user input addresses into geographic coordinates.
-5.  **Firebase (Auth Sync)**: Allows seamless Google/Social sign-in synchronization with the local user database.
-
-## Deployment Guide
-
-### Backend (Laravel) - Deploying to Render/Railway
-1.  **Repository**: Connect this repository to your hosting provider.
-2.  **Build Command**: `composer install --no-dev && php artisan migrate --force`
-3.  **Environment Variables**: Ensure all keys in `.env.example` are set in your hosting provider's dashboard.
-4.  **Database**: Recommended to use a managed PostgreSQL instance (e.g., Supabase).
-
-### Frontend (HTML/JS) - Deploying to Vercel/Netlify
-1.  **Repository**: Connect the `/frontend` directory.
-2.  **API URL**: Update `assets/js/main.js` with your production backend URL.
-3.  **Firebase**: Configure your production Firebase config in `login.html`.
-
-## API Endpoints (Quick Reference)
-
-- `GET /api/photographers` - List all photographers.
-- `GET /api/search/location?address={city}` - Search photographers by city (Google Maps).
-- `POST /api/bookings/intent` - Create a Stripe payment intent.
-- `POST /api/auth/firebase` - Sync Firebase social login with local account.
-- `GET /api/messages` - Retrieve chat history.
+Or use the composer shortcut:
+```bash
+composer run setup
+```
 
 ---
-© 2026 LensLink Project
+
+## Environment Variables
+
+Copy `.env.example` and fill in the required values:
+
+```env
+# Database
+DB_CONNECTION=sqlite
+
+# Cloudinary
+CLOUDINARY_URL=cloudinary://key:secret@cloud_name
+
+# Pusher
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_APP_CLUSTER=
+
+# Stripe
+STRIPE_SECRET=
+
+# Google Maps
+GOOGLE_MAPS_KEY=
+
+# Firebase
+FIREBASE_CREDENTIALS=storage/app/firebase-auth.json
+
+# CORS
+ALLOWED_ORIGINS=http://localhost:5500
+```
+
+---
+
+## API Documentation
+
+Full interactive documentation is available at:
+👉 [`api-docs.html`](../api-docs.html) — open in a browser
+
+**Base URL:** `http://127.0.0.1:8000/api`
+
+Quick reference:
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| POST | `/register` | Public | Register a new user |
+| POST | `/login` | Public | Login and get token |
+| POST | `/logout` | Bearer | Invalidate token |
+| GET | `/profile` | Bearer | Get own profile |
+| GET | `/photographers` | Public | List photographers |
+| GET | `/search/location?address=` | Public | Search by location |
+| GET/POST | `/posts` | Bearer | Social feed |
+| GET/POST | `/messages` | Bearer | Messaging |
+| GET/POST | `/bookings` | Bearer | Bookings |
+| POST | `/bookings/intent` | Bearer | Stripe payment intent |
+| GET | `/admin-stats` | Admin | Platform stats |
+
+---
+
+## Deployment
+
+### Backend — Render / Railway
+1. Connect this repository
+2. Build command: `composer install --no-dev && php artisan migrate --force && php artisan db:seed --force`
+3. Set all `.env` variables in your hosting dashboard
+4. Set `ALLOWED_ORIGINS` to your deployed frontend URL
+
+### Frontend — Vercel / Netlify
+1. Connect the `/frontend` directory
+2. Update `assets/js/main.js` with your production API URL
+3. Restrict Firebase API key by domain in the Firebase Console
+
+---
+
+© 2026 LensLink — SIA Group 2 Vibe Coders
