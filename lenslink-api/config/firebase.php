@@ -50,9 +50,18 @@ return [
              *
              */
 
-            'credentials' => (is_string(env('FIREBASE_CREDENTIALS')) && str_starts_with(trim(env('FIREBASE_CREDENTIALS')), '{'))
-                ? json_decode(env('FIREBASE_CREDENTIALS'), true)
-                : env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS')),
+            'credentials' => (function () {
+                $raw = env('FIREBASE_CREDENTIALS');
+                if (is_string($raw) && str_starts_with(trim($raw), '{')) {
+                    $creds = json_decode($raw, true);
+                    if (isset($creds['private_key'])) {
+                        // Fix double-escaped newlines (\n) inside the private key
+                        $creds['private_key'] = str_replace('\n', "\n", $creds['private_key']);
+                    }
+                    return $creds;
+                }
+                return env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS'));
+            })(),
 
             /*
              * ------------------------------------------------------------------------
