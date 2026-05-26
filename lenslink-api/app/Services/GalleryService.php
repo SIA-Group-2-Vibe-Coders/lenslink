@@ -38,7 +38,7 @@ class GalleryService
         $gallery = Gallery::create([
             'title'           => $data['title'],
             'description'     => $data['description'] ?? null,
-            'cover_image'     => $coverImageUrl ?? 'https://via.placeholder.com/600x400?text=No+Cover+Image',
+            'cover_image'     => $coverImageUrl ?? 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=1000',
             'is_public'       => filter_var($data['is_public'] ?? false, FILTER_VALIDATE_BOOLEAN),
             'photographer_id' => $photographerId,
             'client_id'       => $data['client_id'] ?? null,

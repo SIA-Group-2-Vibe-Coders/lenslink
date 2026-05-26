@@ -112,7 +112,12 @@ async function apiCall(endpoint, method = 'GET', data = null) {
  * Helper to get full storage URL
  */
 function getStorageUrl(path) {
-    if (!path) return 'https://via.placeholder.com/300?text=No+Image';
+    if (!path || (typeof path === 'string' && (path.includes('placeholder') || path.includes('via.placeholder')))) {
+        if (typeof path === 'string' && (path.includes('avatar') || path.includes('150') || path.includes('profile'))) {
+            return 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150';
+        }
+        return 'https://images.unsplash.com/photo-1492691527719-9d1e07e534b4?q=80&w=600';
+    }
     if (path.startsWith('http')) return path;
     return STORAGE_BASE_URL + path;
 }

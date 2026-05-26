@@ -151,7 +151,7 @@
                 }
 
                 photographers.forEach(p => {
-                    const avatar = p.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=f59e0b&color=18181b&size=128`;
+                    const avatar = p.avatar ? getStorageUrl(p.avatar) : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name)}&background=f59e0b&color=18181b&size=128`;
                     const card = `
                         <div class="group relative bg-zinc-900/40 border border-zinc-800/50 rounded-[2rem] p-8 hover:bg-zinc-900/60 transition-all duration-500 hover:border-amber-500/30 hover:-translate-y-2 overflow-hidden">
                             <!-- Background Accent -->

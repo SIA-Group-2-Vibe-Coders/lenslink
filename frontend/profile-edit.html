@@ -45,7 +45,7 @@
                 <div>
                     <label class="block text-sm font-medium text-zinc-300 mb-2">Avatar / Profile Picture</label>
                     <div class="flex items-center gap-4">
-                        <img id="avatarPreview" src="https://via.placeholder.com/150" class="w-16 h-16 rounded-full object-cover border border-zinc-700" alt="Avatar">
+                        <img id="avatarPreview" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150" class="w-16 h-16 rounded-full object-cover border border-zinc-700" alt="Avatar">
                         <input type="file" id="avatarInput" name="avatar" accept="image/*" class="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-amber-500 file:text-zinc-950 hover:file:bg-amber-400 transition cursor-pointer">
                     </div>
                 </div>
@@ -54,7 +54,7 @@
                 <div>
                     <label class="block text-sm font-medium text-zinc-300 mb-2">Cover Photo</label>
                     <div class="flex items-center gap-4">
-                        <img id="coverPreview" src="https://via.placeholder.com/300x100" class="w-24 h-12 rounded object-cover border border-zinc-700" alt="Cover Photo">
+                        <img id="coverPreview" src="https://images.unsplash.com/photo-1542038784456-1ea8e935640e?q=80&w=1000" class="w-24 h-12 rounded object-cover border border-zinc-700" alt="Cover Photo">
                         <input type="file" id="coverInput" name="cover_photo" accept="image/*" class="text-sm text-zinc-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-zinc-800 file:text-white hover:file:bg-zinc-700 transition cursor-pointer">
                     </div>
                 </div>
@@ -126,10 +126,10 @@
                 }
 
                 if (currentUser.avatar) {
-                    document.getElementById('avatarPreview').src = currentUser.avatar.startsWith('http') ? currentUser.avatar : getStorageUrl(currentUser.avatar);
+                    document.getElementById('avatarPreview').src = getStorageUrl(currentUser.avatar);
                 }
                 if (currentUser.cover_photo) {
-                    document.getElementById('coverPreview').src = currentUser.cover_photo.startsWith('http') ? currentUser.cover_photo : getStorageUrl(currentUser.cover_photo);
+                    document.getElementById('coverPreview').src = getStorageUrl(currentUser.cover_photo);
                 }
             }
         });
