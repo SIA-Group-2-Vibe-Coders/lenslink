@@ -19,9 +19,12 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => array_map(
-        'trim',
-        explode(',', env('ALLOWED_ORIGINS', 'http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000'))
+    'allowed_origins' => array_merge(
+        array_map(
+            'trim',
+            explode(',', env('ALLOWED_ORIGINS', 'http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000'))
+        ),
+        ['https://lenslink-seven.vercel.app']
     ),
 
     'allowed_origins_patterns' => [],
