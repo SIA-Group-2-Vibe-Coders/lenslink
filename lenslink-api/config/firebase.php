@@ -52,13 +52,20 @@ return [
 
             'credentials' => (function () {
                 $raw = env('FIREBASE_CREDENTIALS');
-                if (is_string($raw) && str_starts_with(trim($raw), '{')) {
-                    $creds = json_decode($raw, true);
-                    if (isset($creds['private_key'])) {
-                        // Fix double-escaped newlines (\n) inside the private key
-                        $creds['private_key'] = str_replace('\n', "\n", $creds['private_key']);
+                if (is_string($raw)) {
+                    if (str_starts_with(trim($raw), '{')) {
+                        $creds = json_decode($raw, true);
+                        if (isset($creds['private_key'])) {
+                            // Fix both single-escaped (\n) and double-escaped (\\n) newlines inside the private key
+                            $creds['private_key'] = str_replace(['\n', '\\n'], "\n", $creds['private_key']);
+                        }
+                        return $creds;
                     }
-                    return $creds;
+                    
+                    // If it is a relative file path, make it absolute using base_path() to avoid resolution failures
+                    if (!str_starts_with($raw, '/') && !str_starts_with($raw, '\\') && !str_contains($raw, ':')) {
+                        return base_path($raw);
+                    }
                 }
                 return env('FIREBASE_CREDENTIALS', env('GOOGLE_APPLICATION_CREDENTIALS'));
             })(),
