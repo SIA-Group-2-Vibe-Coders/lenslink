@@ -26,15 +26,23 @@ class ExternalAuthService
             ]);
         }
 
-        $user = User::updateOrCreate(
-            ['email' => $firebaseUser->email],
-            [
-                'name' => $firebaseUser->displayName ?? 'Firebase User',
+        $user = User::where('email', $firebaseUser->email)->first();
+
+        if (!$user) {
+            $user = User::create([
+                'email'    => $firebaseUser->email,
+                'name'     => $firebaseUser->displayName ?? 'Firebase User',
                 'password' => Hash::make(Str::random(24)), // Random password for social users
-                'avatar' => $firebaseUser->photoUrl,
-                'role_id' => 2,
-            ]
-        );
+                'avatar'   => $firebaseUser->photoUrl,
+                'role_id'  => 2,
+            ]);
+        } else {
+            // Update name and avatar if not set, without touching password
+            $user->update([
+                'name'   => $user->name ?: ($firebaseUser->displayName ?? 'Firebase User'),
+                'avatar' => $user->avatar ?: $firebaseUser->photoUrl,
+            ]);
+        }
 
         return $user;
     }

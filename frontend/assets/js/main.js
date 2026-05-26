@@ -164,6 +164,16 @@ async function checkAuth(requiredRole = null) {
         localStorage.setItem('user', JSON.stringify(user));
         return user;
     } catch (e) {
+        console.warn('Profile sync failed. Operating in offline/cached mode:', e);
+        const cachedUserStr = localStorage.getItem('user');
+        if (cachedUserStr) {
+            try {
+                const cachedUser = JSON.parse(cachedUserStr);
+                if (cachedUser) {
+                    return cachedUser;
+                }
+            } catch (jsonErr) {}
+        }
         clearAuthAndRedirect();
         return null;
     }

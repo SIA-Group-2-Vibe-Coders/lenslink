@@ -91,8 +91,8 @@
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
         async function handleFirebaseLogin() {
-            if (firebaseConfig.apiKey === "FIREBASE_API_KEY") {
-                alert("Please configure your Firebase credentials in login.html");
+            if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY") {
+                alert("Please configure your Firebase credentials in assets/js/firebase-config.js");
                 return;
             }
 
@@ -102,17 +102,27 @@
                 
                 // Sync with backend
                 const syncRes = await apiCall('auth/firebase', 'POST', { id_token: idToken });
+                const alertBox = document.getElementById('alertBox');
                 
-                if (syncRes.status === 'success' || syncRes.user) {
-                    localStorage.setItem('auth_token', syncRes.token || 'firebase_session');
-                    localStorage.setItem('user', JSON.stringify(syncRes.user));
+                if (syncRes.status === 'success') {
+                    localStorage.setItem('auth_token', syncRes.data.token);
+                    localStorage.setItem('user', JSON.stringify(syncRes.data.user));
                     
                     // Route all to dashboard.html which handles role-based routing dynamically
                     window.location.href = 'dashboard.html';
+                } else {
+                    let errMsg = syncRes.message || 'Firebase sync failed.';
+                    if (syncRes.errors) {
+                        errMsg = Object.values(syncRes.errors).flat().join('<br>');
+                    }
+                    alertBox.innerHTML = errMsg;
+                    alertBox.classList.remove('hidden');
                 }
             } catch (error) {
                 console.error("Firebase Login Error:", error);
-                alert("Firebase Login Failed: " + error.message);
+                const alertBox = document.getElementById('alertBox');
+                alertBox.textContent = "Firebase Login Failed: " + error.message;
+                alertBox.classList.remove('hidden');
             }
         }
 
@@ -133,11 +143,11 @@
                 
                 if (res.status === 'success') {
                     // Save Sanctum token and user data
-                    localStorage.setItem('auth_token', res.token);
-                    localStorage.setItem('user', JSON.stringify(res.data));
+                    localStorage.setItem('auth_token', res.data.token);
+                    localStorage.setItem('user', JSON.stringify(res.data.user));
                     
                     // Redirect based on role
-                    if (res.data.role_id == 1) {
+                    if (res.data.user.role_id == 1) {
                         window.location.href = 'admin.html';
                     } else {
                         window.location.href = 'dashboard.html';
