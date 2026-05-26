@@ -21,8 +21,9 @@ class ExternalAuthService
             $firebaseUid = $verifiedIdToken->claims()->get('sub');
             $firebaseUser = $auth->getUser($firebaseUid);
         } catch (\Throwable $e) {
+            \Log::error('Firebase verification failed: ' . $e->getMessage());
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'id_token' => ['The provided Firebase token is invalid or expired.']
+                'id_token' => ['The provided Firebase token is invalid or expired: ' . $e->getMessage()]
             ]);
         }
 
