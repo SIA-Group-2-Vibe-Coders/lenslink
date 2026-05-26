@@ -17,7 +17,8 @@ class ExternalAuthService
         $auth = Firebase::auth();
         
         try {
-            $verifiedIdToken = $auth->verifyIdToken($idToken);
+            // Add a 120-second clock skew leeway to prevent token verification failure due to minor clock mismatches.
+            $verifiedIdToken = $auth->verifyIdToken($idToken, false, 120);
             $firebaseUid = $verifiedIdToken->claims()->get('sub');
             $firebaseUser = $auth->getUser($firebaseUid);
         } catch (\Throwable $e) {

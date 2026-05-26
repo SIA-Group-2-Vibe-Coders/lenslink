@@ -84,14 +84,18 @@
 
     <script>
         // Initialize Firebase using config from firebase-config.js
+        let googleProvider = null;
         if (FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY") {
-            firebase.initializeApp(FIREBASE_CONFIG);
+            try {
+                firebase.initializeApp(FIREBASE_CONFIG);
+                googleProvider = new firebase.auth.GoogleAuthProvider();
+            } catch (e) {
+                console.error("Firebase initialization failed:", e);
+            }
         }
 
-        const googleProvider = new firebase.auth.GoogleAuthProvider();
-
         async function handleFirebaseLogin() {
-            if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY") {
+            if (!FIREBASE_CONFIG.apiKey || FIREBASE_CONFIG.apiKey === "YOUR_API_KEY" || !googleProvider) {
                 alert("Please configure your Firebase credentials in assets/js/firebase-config.js");
                 return;
             }

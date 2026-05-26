@@ -27,10 +27,10 @@ class ImageService
         $originalUrl = $uploadResult['secure_url'];
 
         // Generate thumbnail URL (300px wide) using Cloudinary transformation
-        $thumbnailUrl = "{$this->cloudBase}/w_300,c_scale/{$publicId}";
+        $thumbnailUrl = str_replace('/upload/', '/upload/w_300,c_scale/', $originalUrl);
 
         // Generate watermarked URL using Cloudinary text overlay
-        $watermarkedUrl = "{$this->cloudBase}/l_text:Arial_48:LensLink%20Protected,g_center,o_50,co_white/{$publicId}";
+        $watermarkedUrl = str_replace('/upload/', '/upload/l_text:Arial_48:LensLink%20Protected,g_center,o_50,co_white/', $originalUrl);
 
         $imageRecord = Image::create([
             'album_id'          => $albumId,
@@ -72,11 +72,17 @@ class ImageService
         // Move the image from active → archive folder in Cloudinary
         $newPublicId = str_replace('lenslink/active/', 'lenslink/archive/', $oldPublicId);
 
-        Cloudinary::uploadApi()->rename($oldPublicId, $newPublicId);
+        $renameResult = Cloudinary::uploadApi()->rename($oldPublicId, $newPublicId);
+        $newSecureUrl = $renameResult['secure_url'];
+
+        $newThumbnailUrl = str_replace('/upload/', '/upload/w_300,c_scale/', $newSecureUrl);
+        $newWatermarkedUrl = str_replace('/upload/', '/upload/l_text:Arial_48:LensLink%20Protected,g_center,o_50,co_white/', $newSecureUrl);
 
         $image->update([
-            'status'    => 'archived',
-            'file_path' => $newPublicId,
+            'status'            => 'archived',
+            'file_path'         => $newPublicId,
+            'thumbnail_path'    => $newThumbnailUrl,
+            'watermarked_path'  => $newWatermarkedUrl,
         ]);
 
         StorageLog::create([
