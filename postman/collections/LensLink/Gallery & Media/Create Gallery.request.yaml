@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/gallery
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"title": "My Wedding Gallery", "description": "Beautiful moments from weddings"}
+

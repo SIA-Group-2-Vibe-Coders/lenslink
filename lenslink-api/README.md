@@ -124,7 +124,7 @@ ALLOWED_ORIGINS=http://localhost:5500
 ## API Documentation
 
 Full interactive documentation is available at:
-👉 [`api-docs.html`](../api-docs.html) — open in a browser
+👉 [`api-docs.html`](../frontend/api-docs.html) — open in a browser
 
 **Base URL:** `http://127.0.0.1:8000/api`
 

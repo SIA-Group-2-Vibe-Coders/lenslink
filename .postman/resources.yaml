@@ -5,6 +5,7 @@ localResources:
     - ..\lenslink-api\README.md
   collections:
     - ../postman/collections/POS SYS
+    - ../postman/collections/LensLink
 cloudResources:
   collections:
     ../postman/collections/POS SYS: 52384861-9bd20c93-dbb9-4472-acb7-f11548b0068c

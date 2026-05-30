@@ -1,0 +1,6 @@
+$kind: http-request
+url: {{baseUrl}}/albums
+method: GET
+headers:
+  Accept: application/json
+

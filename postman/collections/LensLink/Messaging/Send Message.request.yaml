@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/messages
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"receiver_id": 3, "message": "Hi, I would like to book a photoshoot."}
+

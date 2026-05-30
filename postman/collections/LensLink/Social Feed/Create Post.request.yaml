@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/posts
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"caption": "Golden hour session in NYC", "image_url": "https://images.unsplash.com/photo-1452587925148-ce544e77e70d"}
+

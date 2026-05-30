@@ -1,0 +1,6 @@
+$kind: http-request
+url: {{baseUrl}}/gallery
+method: GET
+headers:
+  Accept: application/json
+

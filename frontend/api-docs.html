@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -621,7 +621,8 @@
       <h1>LensLink API Documentation</h1>
       <p>Complete reference for the LensLink photography platform API. Built with Laravel 12 and secured with Laravel Sanctum for token-based authentication, role-based access control, and rate limiting.</p>
       <div class="hero-meta">
-        <div class="hero-chip">Base URL <strong>http://127.0.0.1:8000/api</strong></div>
+        <div class="hero-chip">Local URL <strong>http://127.0.0.1:8000/api</strong></div>
+        <div class="hero-chip">Production URL <strong>https://lenslink-api-3w31.onrender.com/api</strong></div>
         <div class="hero-chip">Version <strong>v1.0</strong></div>
         <div class="hero-chip">Auth <strong>Bearer Token (Sanctum)</strong></div>
         <div class="hero-chip">Format <strong>JSON</strong></div>
@@ -1685,8 +1686,34 @@ Content-Type: application/json
     const icon = header.querySelector('.toggle-icon');
     const isOpen = body.classList.contains('open');
     body.classList.toggle('open', !isOpen);
-    icon.classList.toggle('open', !isOpen);
+    if (icon) icon.classList.toggle('open', !isOpen);
   }
+
+  // Auto-expand targeted endpoint card on hash change
+  function handleHashChange() {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#ep-')) {
+      const target = document.querySelector(hash);
+      if (target) {
+        const body = target.querySelector('.endpoint-body');
+        const icon = target.querySelector('.toggle-icon');
+        if (body && !body.classList.contains('open')) {
+          body.classList.add('open');
+          if (icon) icon.classList.add('open');
+        }
+      }
+    }
+  }
+
+  window.addEventListener('hashchange', handleHashChange);
+  window.addEventListener('load', handleHashChange);
+
+  // Hook sidebar link clicks to expand immediately
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', () => {
+      setTimeout(handleHashChange, 50);
+    });
+  });
 
   // Highlight active sidebar link on scroll
   const sections = document.querySelectorAll('[id]');

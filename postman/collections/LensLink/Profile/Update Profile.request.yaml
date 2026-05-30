@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/profile/update
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"name": "Updated Name", "bio": "Professional photographer", "specialty": "Wedding", "location": "New York, NY", "price_range": "$$$"}
+

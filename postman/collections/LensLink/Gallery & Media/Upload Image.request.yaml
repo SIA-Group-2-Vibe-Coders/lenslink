@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/images/upload
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"album_id": 1, "image": "IMAGE_FILE_DATA_OR_URL"}
+

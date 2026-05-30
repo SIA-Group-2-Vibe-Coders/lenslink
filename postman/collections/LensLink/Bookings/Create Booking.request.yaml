@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/bookings
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"photographer_id": 2, "booking_date": "2026-06-15 14:00:00", "package_details": "Gold Wedding Package", "total_price": 1500.00}
+

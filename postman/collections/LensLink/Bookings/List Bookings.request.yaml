@@ -1,0 +1,7 @@
+$kind: http-request
+url: {{baseUrl}}/bookings
+method: GET
+headers:
+  Accept: application/json
+  Authorization: Bearer {{token}}
+

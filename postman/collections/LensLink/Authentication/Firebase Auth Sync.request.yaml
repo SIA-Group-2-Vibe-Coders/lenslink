@@ -1,0 +1,11 @@
+$kind: http-request
+url: {{baseUrl}}/auth/firebase
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {"firebase_token": "YOUR_FIREBASE_ID_TOKEN"}
+

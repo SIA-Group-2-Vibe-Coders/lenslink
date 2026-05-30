@@ -1,0 +1,6 @@
+$kind: http-request
+url: {{baseUrl}}/search/location?address=New York
+method: GET
+headers:
+  Accept: application/json
+

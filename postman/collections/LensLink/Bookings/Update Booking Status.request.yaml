@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/bookings/1/status
+method: PATCH
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"status": "accepted"}
+

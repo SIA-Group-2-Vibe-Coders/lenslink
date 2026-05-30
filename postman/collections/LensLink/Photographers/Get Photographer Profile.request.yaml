@@ -1,0 +1,6 @@
+$kind: http-request
+url: {{baseUrl}}/photographers/2
+method: GET
+headers:
+  Accept: application/json
+

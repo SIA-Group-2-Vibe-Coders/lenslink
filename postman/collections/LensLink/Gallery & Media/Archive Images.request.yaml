@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/images/archive
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"image_ids": [1, 2, 3]}
+

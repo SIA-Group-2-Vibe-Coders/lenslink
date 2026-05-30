@@ -1,0 +1,12 @@
+$kind: http-request
+url: {{baseUrl}}/posts/1/comment
+method: POST
+headers:
+  Accept: application/json
+  Content-Type: application/json
+  Authorization: Bearer {{token}}
+body:
+  type: json
+  content: |-
+    {"body": "Amazing shot!"}
+
