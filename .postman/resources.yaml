@@ -1,0 +1,10 @@
+workspace:
+  id: f30ca968-175d-40b0-81fc-7c33b1c789bf
+localResources:
+  docs:
+    - ..\lenslink-api\README.md
+  collections:
+    - ../postman/collections/POS SYS
+cloudResources:
+  collections:
+    ../postman/collections/POS SYS: 52384861-9bd20c93-dbb9-4472-acb7-f11548b0068c
